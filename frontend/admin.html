@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
+
+<title>GIKAZEE ADMIN PANEL</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#0f172a;
+  color:white;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+  width:240px;
+  height:100vh;
+  position:fixed;
+  left:0;
+  top:0;
+  background:#111827;
+  padding-top:20px;
+  overflow:auto;
+  transition:0.3s;
+  z-index:999;
+}
+
+.sidebar h2{
+  text-align:center;
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+.sidebar a{
+  display:block;
+  padding:15px;
+  color:white;
+  text-decoration:none;
+}
+
+.sidebar a:hover{
+  background:#1e293b;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+  margin-left:240px;
+  padding:20px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:15px;
+}
+
+.card h3{
+  color:#94a3b8;
+  margin-bottom:10px;
+}
+
+.card p{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.section{
+  background:#1e293b;
+  padding:20px;
+  border-radius:15px;
+  margin-top:20px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+table th,
+table td{
+  border:1px solid #334155;
+  padding:10px;
+  text-align:center;
+}
+
+input,
+textarea{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#334155;
+  color:white;
+  margin-top:10px;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+  margin:3px;
+}
+
+button:hover{
+  background:#1d4ed8;
+}
+
+.danger{
+  background:#dc2626;
+}
+
+.success{
+  background:#16a34a;
+}
+
+.warning{
+  background:#f59e0b;
+}
+
+.menu-btn{
+  display:none;
+  position:fixed;
+  top:15px;
+  left:15px;
+  z-index:1000;
+  font-size:22px;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+  .menu-btn{
+    display:block;
+  }
+
+  .sidebar{
+    left:-260px;
+  }
+
+  .sidebar.active{
+    left:0;
+  }
+
+  .main{
+    margin-left:0;
+    padding-top:70px;
+  }
+
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  table{
+    font-size:12px;
+  }
+
+}
+
+/* ================= TOAST ================= */
+
+#toast{
+  position:fixed;
+  top:20px;
+  right:20px;
+  background:#22c55e;
+  color:white;
+  padding:15px 20px;
+  border-radius:12px;
+  display:none;
+  z-index:99999;
+  font-weight:bold;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ================= MENU BUTTON ================= -->
+
+<button
+  class="menu-btn"
+  onclick="toggleSidebar()"
+>
+☰
+</button>
+
+<!-- ================= SIDEBAR ================= -->
+
+<div
+  class="sidebar"
+  id="sidebar"
+>
+
+  <h2>GIKAZEE ADMIN</h2>
+
+  <a href="#">Dashboard</a>
+
+  <a href="#usersSection">Users</a>
+
+  <a href="#depositSection">Deposits</a>
+
+  <a href="#withdrawSection">Withdrawals</a>
+
+  <a href="#announcementSection">Announcements</a>
+
+  <a href="#" onclick="logout()">
+    Logout
+  </a>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+
+  <div class="topbar">
+
+    <h1>Admin Dashboard</h1>
+
+    <button onclick="loadEverything()">
+      Refresh
+    </button>
+
+  </div>
+
+  <!-- ================= STATS ================= -->
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>Total Users</h3>
+      <p id="users">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Deposits</h3>
+      <p id="deposits">$0</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Withdrawals</h3>
+      <p id="withdrawals">$0</p>
+    </div>
+
+    <div class="card">
+      <h3>Active Investments</h3>
+      <p id="active">0</p>
+    </div>
+
+  </div>
+
+  <!-- ================= ANALYTICS ================= -->
+
+  <div class="section">
+
+    <h2>Platform Analytics</h2>
+
+    <canvas id="analyticsChart"></canvas>
+
+  </div>
+
+  <!-- ================= ANNOUNCEMENT ================= -->
+
+  <div
+    class="section"
+    id="announcementSection"
+  >
+
+    <h2>Post Announcement</h2>
+
+    <textarea
+      id="announcementText"
+      rows="5"
+      placeholder="Write announcement..."
+    ></textarea>
+
+    <button onclick="postAnnouncement()">
+      Post Announcement
+    </button>
+
+  </div>
+
+  <!-- ================= USERS ================= -->
+
+  <div
+    class="section"
+    id="usersSection"
+  >
+
+    <h2>User Management</h2>
+
+    <input
+      id="searchUser"
+      placeholder="Search user..."
+      onkeyup="searchUsers()"
+    />
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Balance</th>
+          <th>Referral</th>
+          <th>Status</th>
+          <th>Actions</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="usersTable"></tbody>
+
+    </table>
+
+  </div>
+
+  <!-- ================= DEPOSITS ================= -->
+
+  <div
+    class="section"
+    id="depositSection"
+  >
+
+    <h2>Pending Deposits</h2>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Proof</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="depositTable"></tbody>
+
+    </table>
+
+  </div>
+
+  <!-- ================= WITHDRAWALS ================= -->
+
+  <div
+    class="section"
+    id="withdrawSection"
+  >
+
+    <h2>Pending Withdrawals</h2>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Details</th>
+          <th>Action</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="withdrawTable"></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<!-- ================= TOAST ================= -->
+
+<div id="toast"></div>
+
+<script>
+
+const token =
+  localStorage.getItem("token");
+
+if(!token){
+
+  window.location.href =
+    "index.html";
+
+}
+
+/* ================= VERIFY ADMIN ================= */
+
+async function verifyAdmin(){
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/verify",
+
+      {
+        headers:{
+          "Authorization":token
+        }
+      }
+
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+      localStorage.clear();
+
+      window.location.href =
+        "index.html";
+
+    }
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+    window.location.href =
+      "index.html";
+
+  }
+
+}
+
+/* ================= LOAD EVERYTHING ================= */
+
+async function loadEverything(){
+
+  loadStats();
+
+  loadUsers();
+
+  loadDeposits();
+
+  loadWithdrawals();
+
+}
+
+/* ================= STATS ================= */
+
+let analyticsChart = null;
+
+async function loadStats(){
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/stats",
+
+      {
+        headers:{
+          "Authorization":token
+        }
+      }
+
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+      return;
+    }
+
+    animateValue(
+      "users",
+      data.stats.totalUsers
+    );
+
+    animateMoney(
+      "deposits",
+      data.stats.totalDeposits
+    );
+
+    animateMoney(
+      "withdrawals",
+      data.stats.totalWithdrawals
+    );
+
+    animateValue(
+      "active",
+      data.stats.activeInvestments
+    );
+
+    createAnalytics(data.stats);
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= ANALYTICS ================= */
+
+function createAnalytics(stats){
+
+  const ctx =
+    document.getElementById(
+      "analyticsChart"
+    );
+
+  if(analyticsChart){
+
+    analyticsChart.destroy();
+
+  }
+
+  analyticsChart =
+    new Chart(ctx,{
+
+      type:"bar",
+
+      data:{
+
+        labels:[
+          "Users",
+          "Deposits",
+          "Withdrawals",
+          "Balance"
+        ],
+
+        datasets:[{
+
+          label:"Platform Data",
+
+          data:[
+
+            stats.totalUsers,
+
+            stats.totalDeposits,
+
+            stats.totalWithdrawals,
+
+            stats.totalBalance || 0
+
+          ]
+
+        }]
+
+      }
+
+    });
+
+}
+
+/* ================= LOAD USERS ================= */
+
+let allUsers = [];
+
+async function loadUsers(){
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/users",
+
+      {
+        headers:{
+          "Authorization":token
+        }
+      }
+
+    );
+
+    const data = await res.json();
+
+    allUsers = data.users || [];
+
+    renderUsers(allUsers);
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= RENDER USERS ================= */
+
+function renderUsers(users){
+
+  const table =
+    document.getElementById(
+      "usersTable"
+    );
+
+  table.innerHTML = "";
+
+  users.forEach(user => {
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${user.id}</td>
+
+        <td>${user.name}</td>
+
+        <td>${user.email}</td>
+
+        <td>$${user.balance}</td>
+
+        <td>$${user.referral_earnings || 0}</td>
+
+        <td>${user.status}</td>
+
+        <td>
+
+          <button
+            class="warning"
+            onclick="suspendUser(${user.id})"
+          >
+            Suspend
+          </button>
+
+          <button
+            class="success"
+            onclick="activateUser(${user.id})"
+          >
+            Activate
+          </button>
+
+          <button
+            class="danger"
+            onclick="deleteUser(${user.id})"
+          >
+            Delete
+          </button>
+
+          <button
+            onclick="manageBalance(${user.id})"
+          >
+            Balance
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+}
+
+/* ================= SEARCH USERS ================= */
+
+function searchUsers(){
+
+  const keyword =
+    document.getElementById(
+      "searchUser"
+    ).value.toLowerCase();
+
+  const filtered =
+    allUsers.filter(user =>
+
+      user.name.toLowerCase().includes(keyword)
+
+      ||
+
+      user.email.toLowerCase().includes(keyword)
+
+    );
+
+  renderUsers(filtered);
+
+}
+
+/* ================= LOAD DEPOSITS ================= */
+
+async function loadDeposits(){
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/pending",
+
+      {
+        headers:{
+          "Authorization":token
+        }
+      }
+
+    );
+
+    const data = await res.json();
+
+    const table =
+      document.getElementById(
+        "depositTable"
+      );
+
+    table.innerHTML = "";
+
+    data.transactions.forEach(tx => {
+
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${tx.id}</td>
+
+          <td>${tx.user_id}</td>
+
+          <td>$${tx.amount}</td>
+
+          <td>${tx.payment_method}</td>
+
+          <td>
+
+            ${
+              tx.proof_image
+
+              ?
+
+              `<a
+                href="http://localhost:3001/uploads/${tx.proof_image}"
+                target="_blank"
+                style="color:#38bdf8;"
+              >
+                View Proof
+              </a>`
+
+              :
+
+              "No Proof"
+            }
+
+          </td>
+
+          <td>
+
+            <button
+              class="success"
+              onclick="approve(${tx.id})"
+            >
+              Approve
+            </button>
+
+            <button
+              class="danger"
+              onclick="rejectTx(${tx.id})"
+            >
+              Reject
+            </button>
+
+          </td>
+
+        </tr>
+
+      `;
+
+    });
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= LOAD WITHDRAWALS ================= */
+
+async function loadWithdrawals(){
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/pending-withdrawals",
+
+      {
+        headers:{
+          "Authorization":token
+        }
+      }
+
+    );
+
+    const data = await res.json();
+
+    const table =
+      document.getElementById(
+        "withdrawTable"
+      );
+
+    table.innerHTML = "";
+
+    data.transactions.forEach(tx => {
+
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${tx.id}</td>
+
+          <td>${tx.user_id}</td>
+
+          <td>$${tx.amount}</td>
+
+          <td>${tx.payment_method}</td>
+
+          <td>${tx.payment_details}</td>
+
+          <td>
+
+            <button
+              class="success"
+              onclick="approve(${tx.id})"
+            >
+              Approve
+            </button>
+
+            <button
+              class="danger"
+              onclick="rejectTx(${tx.id})"
+            >
+              Reject
+            </button>
+
+          </td>
+
+        </tr>
+
+      `;
+
+    });
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= APPROVE ================= */
+
+async function approve(id){
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/approve",
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":token
+        },
+
+        body:JSON.stringify({
+          transaction_id:id
+        })
+
+      }
+
+    );
+
+    const data = await res.json();
+
+    showToast(data.message);
+
+    loadEverything();
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= REJECT ================= */
+
+async function rejectTx(id){
+
+  if(!confirm("Reject transaction?")){
+    return;
+  }
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/reject",
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":token
+        },
+
+        body:JSON.stringify({
+          transaction_id:id
+        })
+
+      }
+
+    );
+
+    const data = await res.json();
+
+    showToast(data.message);
+
+    loadEverything();
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= POST ANNOUNCEMENT ================= */
+
+async function postAnnouncement(){
+
+  const message =
+    document.getElementById(
+      "announcementText"
+    ).value.trim();
+
+  if(!message){
+
+    alert("Write announcement");
+
+    return;
+
+  }
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/admin/announcement",
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":token
+        },
+
+        body:JSON.stringify({
+          message
+        })
+
+      }
+
+    );
+
+    const data = await res.json();
+
+    showToast(data.message);
+
+    document.getElementById(
+      "announcementText"
+    ).value = "";
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= USER ACTIONS ================= */
+
+async function suspendUser(id){
+
+  await fetch(
+
+    "http://localhost:3001/api/admin/suspend-user",
+
+    {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":token
+      },
+
+      body:JSON.stringify({
+        user_id:id
+      })
+
+    }
+
+  );
+
+  showToast("User suspended");
+
+  loadUsers();
+
+}
+
+async function activateUser(id){
+
+  await fetch(
+
+    "http://localhost:3001/api/admin/activate-user",
+
+    {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":token
+      },
+
+      body:JSON.stringify({
+        user_id:id
+      })
+
+    }
+
+  );
+
+  showToast("User activated");
+
+  loadUsers();
+
+}
+
+async function deleteUser(id){
+
+  if(!confirm("Delete user?")){
+    return;
+  }
+
+  await fetch(
+
+    "http://localhost:3001/api/admin/delete-user",
+
+    {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":token
+      },
+
+      body:JSON.stringify({
+        user_id:id
+      })
+
+    }
+
+  );
+
+  showToast("User deleted");
+
+  loadUsers();
+
+}
+
+/* ================= BALANCE ================= */
+
+async function manageBalance(id){
+
+  const action =
+    prompt("Type add or remove");
+
+  if(!action){
+    return;
+  }
+
+  const amount =
+    prompt("Enter amount");
+
+  if(!amount){
+    return;
+  }
+
+  const res = await fetch(
+
+    "http://localhost:3001/api/admin/update-balance",
+
+    {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":token
+      },
+
+      body:JSON.stringify({
+
+        user_id:id,
+        amount,
+        action
+
+      })
+
+    }
+
+  );
+
+  const data = await res.json();
+
+  showToast(data.message);
+
+  loadUsers();
+
+}
+
+/* ================= ANIMATE ================= */
+
+function animateValue(id, value){
+
+  const el =
+    document.getElementById(id);
+
+  let start = 0;
+
+  const step =
+    value / 50;
+
+  const timer = setInterval(()=>{
+
+    start += step;
+
+    if(start >= value){
+
+      start = value;
+
+      clearInterval(timer);
+
+    }
+
+    el.innerText =
+      Math.floor(start);
+
+  },20);
+
+}
+
+function animateMoney(id, value){
+
+  const el =
+    document.getElementById(id);
+
+  let start = 0;
+
+  const step =
+    value / 50;
+
+  const timer = setInterval(()=>{
+
+    start += step;
+
+    if(start >= value){
+
+      start = value;
+
+      clearInterval(timer);
+
+    }
+
+    el.innerText =
+      "$" + start.toFixed(2);
+
+  },20);
+
+}
+
+/* ================= TOAST ================= */
+
+function showToast(message){
+
+  const toast =
+    document.getElementById(
+      "toast"
+    );
+
+  toast.innerText = message;
+
+  toast.style.display = "block";
+
+  setTimeout(()=>{
+
+    toast.style.display = "none";
+
+  },3000);
+
+}
+
+/* ================= SIDEBAR ================= */
+
+function toggleSidebar(){
+
+  document
+    .getElementById("sidebar")
+    .classList.toggle("active");
+
+}
+
+/* ================= LOGOUT ================= */
+
+function logout(){
+
+  localStorage.clear();
+
+  window.location.href =
+    "index.html";
+
+}
+
+/* ================= START ================= */
+
+verifyAdmin();
+
+loadEverything();
+
+/* ================= AUTO REFRESH ================= */
+
+setInterval(()=>{
+
+  loadStats();
+
+  loadDeposits();
+
+  loadWithdrawals();
+
+},15000);
+
+</script>
+
+</body>
+</html>

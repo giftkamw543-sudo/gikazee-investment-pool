@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Transaction History</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+
+    body{
+      margin:0;
+      font-family:Arial;
+      background:#0f172a;
+      color:white;
+    }
+
+    .sidebar{
+      width:230px;
+      height:100vh;
+      position:fixed;
+      background:#111827;
+      padding-top:20px;
+    }
+
+    .sidebar h2{
+      text-align:center;
+      color:#38bdf8;
+    }
+
+    .sidebar a{
+      display:block;
+      padding:15px;
+      color:white;
+      text-decoration:none;
+    }
+
+    .sidebar a:hover{
+      background:#1e293b;
+    }
+
+    .main{
+      margin-left:230px;
+      padding:20px;
+    }
+
+    .section{
+      background:#1e293b;
+      padding:20px;
+      border-radius:15px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:12px;
+      text-align:center;
+    }
+
+    .pending{
+      color:orange;
+      font-weight:bold;
+    }
+
+    .approved{
+      color:lime;
+      font-weight:bold;
+    }
+
+    .rejected{
+      color:red;
+      font-weight:bold;
+    }
+
+    @media(max-width:768px){
+
+      .sidebar{
+        width:100%;
+        height:auto;
+        position:relative;
+      }
+
+      .main{
+        margin-left:0;
+      }
+
+      table{
+        font-size:12px;
+      }
+
+    }
+
+    /* ================= MOBILE MENU ================= */
+
+.menu-btn{
+
+  display:none;
+
+  position:fixed;
+
+  top:15px;
+
+  left:15px;
+
+  z-index:1000;
+
+  background:#2563eb;
+
+  color:white;
+
+  border:none;
+
+  padding:12px 15px;
+
+  border-radius:8px;
+
+  font-size:22px;
+
+}
+
+@media(max-width:768px){
+
+  .menu-btn{
+    display:block;
+  }
+
+  .sidebar{
+
+    left:-250px;
+
+    transition:0.3s;
+
+    z-index:999;
+
+  }
+
+  .sidebar.active{
+    left:0;
+  }
+
+  .main{
+
+    margin-left:0;
+
+    padding-top:70px;
+
+  }
+
+  .cards{
+
+    grid-template-columns:1fr;
+
+  }
+
+  table{
+    font-size:12px;
+  }
+
+}
+
+</style>
+<body>
+
+  <button class="menu-btn" onclick="toggleSidebar()">
+  ☰
+</button>
+<div class="sidebar" id="sidebar">
+
+  <h2>GIKAZEE</h2>
+
+  <a href="dashboard.html">Dashboard</a>
+
+  <a href="transactions.html">
+    Transactions
+  </a>
+
+  <a href="#" onclick="logout()">
+    Logout
+  </a>
+
+</div>
+
+<div class="main">
+
+  <div class="section">
+
+    <h2>Transaction History</h2>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+
+          <th>Type</th>
+
+          <th>Amount</th>
+
+          <th>Method</th>
+
+          <th>Status</th>
+
+          <th>Date</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="table"></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<script>
+
+const user_id =
+  localStorage.getItem("user_id");
+
+const token =
+  localStorage.getItem("token");
+
+if(!token){
+
+  window.location.href =
+  "index.html";
+
+}
+
+async function loadTransactions(){
+
+  const res = await fetch(
+    `http://localhost:3001/api/transactions/${user_id}`
+  );
+
+  const data = await res.json();
+
+  const table =
+    document.getElementById("table");
+
+  table.innerHTML = "";
+
+  data.transactions.forEach(tx => {
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${tx.id}</td>
+
+        <td>${tx.type}</td>
+
+        <td>$${tx.amount}</td>
+
+        <td>${tx.payment_method || "-"}</td>
+
+        <td>
+
+  <span class="${tx.status}">
+
+    ${tx.status}
+
+  </span>
+
+</td>
+
+        <td>
+          ${new Date(tx.created_at)
+          .toLocaleString()}
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+}
+
+function toggleSidebar(){
+
+  document
+  .getElementById("sidebar")
+  .classList.toggle("active");
+
+}
+
+function logout(){
+
+  localStorage.clear();
+
+  window.location.href =
+  "index.html";
+
+}
+
+loadTransactions();
+
+</script>
+
+</body>
+
+</html>

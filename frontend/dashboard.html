@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>GIKAZEE Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial;
+    }
+
+    body{
+      background:#0f172a;
+      color:white;
+    }
+
+    /* ================= SIDEBAR ================= */
+
+    .sidebar{
+      width:230px;
+      height:100vh;
+      position:fixed;
+      left:0;
+      top:0;
+      background:#111827;
+      padding-top:20px;
+      overflow:auto;
+      transition:0.3s;
+      z-index:999;
+    }
+
+    .sidebar h2{
+      text-align:center;
+      color:#38bdf8;
+      margin-bottom:20px;
+    }
+
+    .sidebar a{
+      display:block;
+      padding:15px;
+      color:white;
+      text-decoration:none;
+    }
+
+    .sidebar a:hover{
+      background:#1e293b;
+    }
+
+    /* ================= MAIN ================= */
+
+    .main{
+      margin-left:230px;
+      padding:20px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:20px;
+    }
+
+    .card{
+      background:#1e293b;
+      padding:20px;
+      border-radius:15px;
+    }
+
+    .card h3{
+      color:#94a3b8;
+      margin-bottom:10px;
+    }
+
+    .card p{
+      font-size:28px;
+      font-weight:bold;
+    }
+
+    .section{
+      background:#1e293b;
+      padding:20px;
+      border-radius:15px;
+      margin-top:20px;
+    }
+
+    input,
+    select{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:none;
+      border-radius:8px;
+      background:#334155;
+      color:white;
+    }
+
+    button{
+      padding:12px 18px;
+      border:none;
+      border-radius:8px;
+      background:#2563eb;
+      color:white;
+      cursor:pointer;
+      margin-top:10px;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:10px;
+      text-align:center;
+    }
+
+    ul{
+      list-style:none;
+      margin-top:10px;
+    }
+
+    ul li{
+      background:#334155;
+      padding:10px;
+      border-radius:8px;
+      margin-top:10px;
+    }
+
+    #paymentInfo{
+      margin-top:15px;
+      background:#334155;
+      padding:15px;
+      border-radius:10px;
+      line-height:1.8;
+    }
+
+    .announcement{
+      background:#2563eb;
+      padding:15px;
+      border-radius:12px;
+      margin-bottom:20px;
+      font-weight:bold;
+      overflow:hidden;
+      white-space:nowrap;
+      animation:scrollText 15s linear infinite;
+      display:none;
+    }
+
+    @keyframes scrollText{
+
+      0%{
+        transform:translateX(100%);
+      }
+
+      100%{
+        transform:translateX(-100%);
+      }
+
+    }
+
+    #liveTicker{
+      background:#111827;
+      padding:12px;
+      border-radius:10px;
+      margin-bottom:20px;
+      color:#22c55e;
+      font-weight:bold;
+    }
+
+    .floating-support{
+      position:fixed;
+      bottom:20px;
+      right:20px;
+      width:60px;
+      height:60px;
+      border-radius:50%;
+      background:#25d366;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:30px;
+      text-decoration:none;
+      z-index:9999;
+      box-shadow:0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    #toast{
+      position:fixed;
+      top:20px;
+      right:20px;
+      background:#22c55e;
+      color:white;
+      padding:15px 20px;
+      border-radius:12px;
+      display:none;
+      z-index:99999;
+      font-weight:bold;
+    }
+
+    .menu-btn{
+      display:none;
+      position:fixed;
+      top:15px;
+      left:15px;
+      z-index:1000;
+      font-size:22px;
+    }
+
+    /* ================= MOBILE ================= */
+
+    @media(max-width:768px){
+
+      .menu-btn{
+        display:block;
+      }
+
+      .sidebar{
+        left:-250px;
+      }
+
+      .sidebar.active{
+        left:0;
+      }
+
+      .main{
+        margin-left:0;
+        padding-top:70px;
+      }
+
+      .cards{
+        grid-template-columns:1fr;
+      }
+
+      table{
+        font-size:12px;
+      }
+
+    }
+
+    /* ================= LIGHT MODE ================= */
+
+    body.light{
+      background:#f1f5f9;
+      color:#0f172a;
+    }
+
+    body.light .sidebar{
+      background:white;
+    }
+
+    body.light .sidebar a{
+      color:#0f172a;
+    }
+
+    body.light .sidebar a:hover{
+      background:#e2e8f0;
+    }
+
+    body.light .card,
+    body.light .section{
+      background:white;
+      color:#0f172a;
+    }
+
+    body.light input,
+    body.light select{
+      background:#e2e8f0;
+      color:#0f172a;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<!-- ================= MENU ================= -->
+
+<button
+  class="menu-btn"
+  onclick="toggleSidebar()"
+>
+  ☰
+</button>
+
+<!-- ================= SIDEBAR ================= -->
+
+<div
+  class="sidebar"
+  id="sidebar"
+>
+
+  <h2>GIKAZEE</h2>
+
+  <a href="#">Dashboard</a>
+
+  <a href="#">Investments</a>
+
+  <a href="transactions.html">
+    Transactions
+  </a>
+
+  <a href="#withdrawSection">
+    Withdrawals
+  </a>
+
+  <a
+    href="#"
+    onclick="toggleNotifications()"
+  >
+    Notifications
+  </a>
+
+  <a
+    href="https://wa.me/260769653801"
+    target="_blank"
+  >
+    WhatsApp Support
+  </a>
+
+  <a
+    href="https://t.me/gikazeesupport"
+    target="_blank"
+  >
+    Telegram Support
+  </a>
+
+  <a
+    href="#"
+    onclick="logout()"
+  >
+    Logout
+  </a>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+
+  <!-- ANNOUNCEMENT -->
+
+  <div
+    id="announcementBanner"
+    class="announcement"
+  ></div>
+
+  <!-- LIVE TICKER -->
+
+  <div id="liveTicker">
+    Loading live activities...
+  </div>
+
+  <!-- TOP -->
+
+  <div class="topbar">
+
+    <h1>User Dashboard</h1>
+
+    <button onclick="toggleTheme()">
+      Toggle Theme
+    </button>
+
+  </div>
+
+  <!-- CARDS -->
+
+  <div class="cards">
+
+    <div class="card">
+
+      <h3>Balance</h3>
+
+      <p id="balance">$0.00</p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>Total ROI</h3>
+
+      <p id="roi">$0.00</p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>Referral Earnings</h3>
+
+      <p id="refEarnings">$0.00</p>
+
+    </div>
+
+    <div class="card">
+
+      <h3>Referral Code</h3>
+
+      <p id="referral">N/A</p>
+
+      <button onclick="copyReferral()">
+        Copy Code
+      </button>
+
+    </div>
+
+    <div class="card">
+
+      <h3>Next ROI In</h3>
+
+      <p
+        id="roiCountdown"
+        style="font-size:22px;"
+      >
+        Loading...
+      </p>
+
+    </div>
+
+  </div>
+
+  <!-- INVEST -->
+
+  <div class="section">
+
+    <h2>Start Investment</h2>
+
+    <select id="plan">
+
+      <option value="23">
+        VIP 1 ($50-$99 | 2.5%)
+      </option>
+
+      <option value="24">
+        VIP 2 ($100-$149 | 3%)
+      </option>
+
+      <option value="25">
+        VIP 3 ($150-$199 | 3.5%)
+      </option>
+
+      <option value="26">
+        VIP 4 ($200-$249 | 4%)
+      </option>
+
+      <option value="27">
+        VIP 5(250-299 | 4.5%)
+      </optio>
+
+      <option value="28">
+        VIP 6 ($300-$349 | 5%)
+      </option>
+
+      <option value="29">
+        VIP 7 ($350-$399 | 5.5%)
+      </option>
+
+      <option value="30">
+        VIP 8 ($400-$449 | 6%)
+      </option>
+
+      <option value="31">
+        VIP 9 ($450-$499 | 6.5%)
+      </option>
+
+      <option value="32">
+        VIP 10 ($500-$549 | 7%)
+      </option>
+
+      <option value="33">
+        VIP 11 ($550-$599 | 7.5%)
+      </option>
+
+      <option value="34">
+        VIP 12 ($600-$649 | 8%)
+      </option>
+
+      <option value="35">
+        VIP 13 ($650-$699 | 8.5%)
+      </option>
+
+      <option value="36">
+        VIP 14 ($700-$749 | 9%)
+      </option>
+
+      <option value="37">
+        VIP 15 ($750-$799 | 9.5%)
+      </option>
+
+      <option value="38">
+        VIP 16 ($800-$1000 | 10%)
+      </option>
+
+
+    </select>
+
+    <input
+      id="amount"
+      type="number"
+      placeholder="Investment Amount"
+    >
+
+    <button onclick="invest()">
+      Invest Now
+    </button>
+
+  </div>
+
+  <!-- PROFIT CALCULATOR -->
+
+  <div class="section">
+
+    <h2>Profit Calculator</h2>
+
+    <input
+      type="number"
+      id="calcAmount"
+      placeholder="Enter Investment Amount"
+    >
+
+    <select id="calcPlan">
+
+      <option value="2.5">
+        VIP 1 - 2.5%
+      </option>
+
+      <option value="3">
+        VIP 2 - 3%
+      </option>
+
+      <option value="3.5">
+        VIP 3 - 3.5%
+      </option>
+
+      <option value="4">
+        VIP 4 - 4%
+      </option>
+
+        <option value="4.5">
+        VIP 5 - 4.5%
+        </option>
+
+        <option value="5">
+        VIP 6 - 5%
+        </option>
+
+        <option value="5.5">
+        VIP 7 - 5.5%
+        </option>
+
+        <option value="6">
+        VIP 8 - 6%
+        </option>
+
+        <option value="6.5">
+        VIP 9 - 6.5%
+        </option>
+
+          <option value="7">
+        VIP 10 - 7%
+        </option>
+
+        <option value="7.5">
+          VIP 11 - 7.5%
+        </option>
+
+         <option value="8">
+          VIP 12 - 8%
+        </option>
+
+         <option value="8.5">
+          VIP 13 - 8.5%
+        </option>
+
+         <option value="9">
+          VIP 14 - 9%
+        </option>
+
+         <option value="9.5">
+          VIP 15 - 9.5%
+        </option>
+
+         <option value="10">
+          VIP 16 - 10%
+        </option>
+
+    </select>
+
+    <button onclick="calculateProfit()">
+      Calculate Profit
+    </button>
+
+    <div
+      id="calcResult"
+      style="
+        margin-top:15px;
+        background:#334155;
+        padding:15px;
+        border-radius:10px;
+      "
+    >
+      Estimated profits will appear here
+    </div>
+
+  </div>
+
+  <!-- DEPOSIT -->
+
+  <div class="section">
+
+    <h2>Deposit</h2>
+
+    <select
+      id="payment_method"
+      onchange="showPaymentDetails()"
+    >
+
+      <option value="">
+        Choose Payment Method
+      </option>
+
+      <option value="Airtel Money">
+        Airtel Money
+      </option>
+
+      <option value="MTN Money">
+        MTN Money
+      </option>
+
+      <option value="USDT TRC20">
+        USDT TRC20
+      </option>
+
+    </select>
+
+    <div id="paymentInfo">
+      Select payment method to see details
+    </div>
+
+    <input
+      id="depositAmount"
+      type="number"
+      placeholder="Deposit Amount"
+    >
+
+    <input
+      id="proof"
+      type="file"
+    >
+
+    <button onclick="deposit()">
+      Request Deposit
+    </button>
+
+  </div>
+
+  <!-- WITHDRAW -->
+
+  <div
+    class="section"
+    id="withdrawSection"
+  >
+
+    <h2>Withdraw</h2>
+
+    <select id="withdraw_method">
+
+      <option value="Airtel Money">
+        Airtel Money
+      </option>
+
+      <option value="MTN Money">
+        MTN Money
+      </option>
+
+      <option value="USDT TRC20">
+        USDT TRC20
+      </option>
+
+    </select>
+
+    <input
+      id="withdraw_details"
+      placeholder="Phone / Wallet Details"
+    >
+
+    <input
+      id="withdrawAmount"
+      type="number"
+      placeholder="Withdraw Amount"
+    >
+
+    <button onclick="withdrawal()">
+      Request Withdrawal
+    </button>
+
+  </div>
+
+  <!-- PROFILE -->
+
+  <div class="section">
+
+    <h2>Profile Settings</h2>
+
+    <input
+      id="profileName"
+      placeholder="Full Name"
+    >
+
+    <input
+      id="profilePhone"
+      placeholder="Phone Number"
+    >
+
+    <input
+      id="profilePassword"
+      type="password"
+      placeholder="New Password"
+    >
+
+    <button onclick="updateProfile()">
+      Save Profile
+    </button>
+
+  </div>
+
+  <!-- NOTIFICATIONS -->
+
+  <div
+    class="section"
+    id="notificationSection"
+    style="display:none;"
+  >
+
+    <h2>Notifications</h2>
+
+    <ul id="notifications"></ul>
+
+  </div>
+
+  <!-- HISTORY -->
+
+  <div class="section">
+
+    <h2>Investment History</h2>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Plan</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Timer</th>
+          <th>Receipt</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="investmentTable"></tbody>
+
+    </table>
+
+  </div>
+
+  <!-- CHART -->
+
+  <div class="section">
+
+    <h2>Analytics Chart</h2>
+
+    <canvas id="myChart"></canvas>
+
+  </div>
+
+<!-- ================= ABOUT US ================= -->
+
+<div class="section">
+
+  <h2>About GIKA-ZEE Investment</h2>
+
+  <div
+    style="
+      line-height:1.9;
+      margin-top:15px;
+      color:#cbd5e1;
+    "
+  >
+
+    <p>
+
+      <b>GIKA-ZEE Investment</b>
+      is a Forex account management and
+      investment community focused on
+      helping individuals grow their
+      capital through professionally
+      managed trading strategies.
+
+    </p>
+
+    <br>
+
+    <p>
+
+      Our mission is to provide a
+      structured and disciplined
+      investment system for people
+      who may not have the experience,
+      time, or confidence to trade
+      the Forex market on their own.
+
+    </p>
+
+    <br>
+
+    <p>
+
+      We operate by pooling investments
+      into a managed trading account
+      handled by a dedicated trading team.
+      Investors simply choose an investment
+      plan that matches their financial
+      capability and earn daily ROI based
+      on the selected package.
+
+    </p>
+
+    <br>
+
+    <h3
+      style="
+        color:#38bdf8;
+        margin-bottom:10px;
+      "
+    >
+      Our Core Priorities
+    </h3>
+
+    <ul
+      style="
+        padding-left:20px;
+        line-height:2;
+      "
+    >
+
+      <li>
+        ✔ Professional trade management
+      </li>
+
+      <li>
+        ✔ Consistency and disciplined risk control
+      </li>
+
+      <li>
+        ✔ Secure and verified payment methods
+      </li>
+
+      <li>
+        ✔ Transparency with investors
+      </li>
+
+      <li>
+        ✔ Long-term financial growth
+      </li>
+
+    </ul>
+
+    <br>
+
+    <p>
+
+      Our system allows investors to
+      withdraw daily profits while
+      maintaining their capital
+      investment for a 30-day trading
+      cycle, after which they may
+      choose to withdraw or reinvest.
+
+    </p>
+
+    <br>
+
+    <p>
+
+      To strengthen investor confidence,
+      we maintain a reserve protection
+      fund designed to support investor
+      security during unfavorable
+      market conditions.
+
+    </p>
+
+    <br>
+
+    <p>
+
+      We believe success comes through
+      trust, teamwork, smart risk
+      management, and creating
+      opportunities for financial
+      growth within our community.
+
+    </p>
+
+  </div>
+<div class="main">
+  
+
+  <!--ABOUT US-->
+<div class="section">
+    <h2>About US</h2>
+  </div>
+
+</div>
+<!-- FLOATING SUPPORT -->
+
+<a
+  href="https://wa.me/260771281179"
+  target="_blank"
+  class="floating-support"
+>
+  💬
+</a>
+
+<!-- TOAST -->
+
+<div id="toast"></div>
+
+<script>
+
+const user_id =
+  localStorage.getItem("user_id");
+
+const token =
+  localStorage.getItem("token");
+
+if(!token){
+
+  window.location.href =
+    "index.html";
+
+}
+
+let myChart = null;
+
+let lastNotificationCount = 0;
+
+/* ================= LOAD DASHBOARD ================= */
+
+async function loadDashboard(){
+
+  try{
+
+    const res = await fetch(
+
+      `http://localhost:3001/api/dashboard/${user_id}`,
+
+      {
+        headers:{
+          "Authorization":token
+        }
+      }
+
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+      showToast("Dashboard load failed");
+
+      return;
+
+    }
+
+    animateValue(
+      "balance",
+      parseFloat(data.user.balance || 0),
+      "$"
+    );
+
+    animateValue(
+      "roi",
+      parseFloat(data.user.roi_total || 0),
+      "$"
+    );
+
+    animateValue(
+      "refEarnings",
+      parseFloat(data.user.referral_earnings || 0),
+      "$"
+    );
+
+    document.getElementById(
+      "referral"
+    ).innerText =
+      data.user.referral_code || "N/A";
+
+    document.getElementById(
+      "profileName"
+    ).value =
+      data.user.name || "";
+
+    document.getElementById(
+      "profilePhone"
+    ).value =
+      data.user.phone || "";
+
+    /* NOTIFICATIONS */
+
+    const notifications =
+      document.getElementById(
+        "notifications"
+      );
+
+    notifications.innerHTML = "";
+
+    data.notifications.forEach(n=>{
+
+      notifications.innerHTML += `
+        <li>${n.message}</li>
+      `;
+
+    });
+
+    if(
+      data.notifications.length >
+      lastNotificationCount &&
+      lastNotificationCount !== 0
+    ){
+
+      showToast(
+        "New notification received"
+      );
+
+    }
+
+    lastNotificationCount =
+      data.notifications.length;
+
+    /* INVESTMENTS */
+
+    const table =
+      document.getElementById(
+        "investmentTable"
+      );
+
+    table.innerHTML = "";
+
+    data.investments.forEach(inv=>{
+
+      table.innerHTML += `
+
+        <tr>
+
+          <td>${inv.plan_name}</td>
+
+          <td>$${inv.amount}</td>
+
+          <td>${inv.status}</td>
+
+          <td>
+
+            <small id="timer-${inv.id}">
+              Loading...
+            </small>
+
+            <br><br>
+
+            <div
+              style="
+                width:100%;
+                background:#334155;
+                height:10px;
+                border-radius:10px;
+                overflow:hidden;
+              "
+            >
+
+              <div
+                id="progress-${inv.id}"
+                style="
+                  width:0%;
+                  height:10px;
+                  background:#22c55e;
+                "
+              ></div>
+
+            </div>
+
+          </td>
+
+          <td>
+
+            <button
+              onclick="downloadReceipt(${inv.id})"
+            >
+              PDF
+            </button>
+
+          </td>
+
+        </tr>
+
+      `;
+
+    });
+
+    createChart(data.investments);
+
+    startTimers(data.investments);
+
+  }catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= ANIMATE ================= */
+
+function animateValue(
+  elementId,
+  finalValue,
+  prefix=""
+){
+
+  const element =
+    document.getElementById(elementId);
+
+  let start = 0;
+
+  const increment =
+    finalValue / 50;
+
+  const timer = setInterval(()=>{
+
+    start += increment;
+
+    if(start >= finalValue){
+
+      start = finalValue;
+
+      clearInterval(timer);
+
+    }
+
+    element.innerText =
+      prefix + start.toFixed(2);
+
+  },20);
+
+}
+
+/* ================= CHART ================= */
+
+function createChart(investments){
+
+  const ctx =
+    document.getElementById("myChart");
+
+  if(myChart){
+
+    myChart.destroy();
+
+  }
+
+  myChart = new Chart(ctx,{
+
+    type:"bar",
+
+    data:{
+
+      labels:
+        investments.map(
+          i => i.plan_name
+        ),
+
+      datasets:[{
+
+        label:"Investment Amount",
+
+        data:
+          investments.map(
+            i => i.amount
+          )
+
+      }]
+
+    }
+
+  });
+
+}
+
+/* ================= TIMERS ================= */
+
+function startTimers(investments){
+
+  setInterval(()=>{
+
+    investments.forEach(inv=>{
+
+      if(!inv.end_date){
+        return;
+      }
+
+      const end =
+        new Date(inv.end_date);
+
+      const start =
+        new Date(inv.start_date);
+
+      const now =
+        new Date();
+
+      const diff =
+        end - now;
+
+      const timer =
+        document.getElementById(
+          `timer-${inv.id}`
+        );
+
+      if(!timer){
+        return;
+      }
+
+      if(diff <= 0){
+
+        timer.innerText =
+          "Completed";
+
+        return;
+
+      }
+
+      const days =
+        Math.floor(
+          diff / (1000*60*60*24)
+        );
+
+      const hours =
+        Math.floor(
+          (diff % (1000*60*60*24))
+          /
+          (1000*60*60)
+        );
+
+      const mins =
+        Math.floor(
+          (diff % (1000*60*60))
+          /
+          (1000*60)
+        );
+
+      timer.innerText =
+        `${days}d ${hours}h ${mins}m left`;
+
+      const total =
+        end - start;
+
+      const elapsed =
+        now - start;
+
+      let progress =
+        (elapsed / total) * 100;
+
+      if(progress > 100){
+        progress = 100;
+      }
+
+      const progressBar =
+        document.getElementById(
+          `progress-${inv.id}`
+        );
+
+      if(progressBar){
+
+        progressBar.style.width =
+          progress + "%";
+
+      }
+
+    });
+
+  },1000);
+
+}
+
+/* ================= ROI COUNTDOWN ================= */
+
+function startROICountdown(){
+
+  setInterval(()=>{
+
+    const now =
+      new Date();
+
+    const next =
+      new Date();
+
+    next.setHours(24,0,0,0);
+
+    const diff =
+      next - now;
+
+    const hours =
+      Math.floor(
+        diff / (1000*60*60)
+      );
+
+    const mins =
+      Math.floor(
+        (diff % (1000*60*60))
+        /
+        (1000*60)
+      );
+
+    const secs =
+      Math.floor(
+        (diff % (1000*60))
+        / 1000
+      );
+
+    document.getElementById(
+      "roiCountdown"
+    ).innerText =
+      `${hours}h ${mins}m ${secs}s`;
+
+  },1000);
+
+}
+
+/* ================= LIVE TICKER ================= */
+
+function startLiveTicker(){
+
+  const activities = [
+
+    "📈 User deposited $120",
+
+    "💰 ROI payment processed",
+
+    "🚀 VIP investment activated",
+
+    "🏦 Withdrawal completed",
+
+    "🎉 New investor joined",
+
+    "🔥 VIP plan upgraded"
+
+  ];
+
+  let index = 0;
+
+  const ticker =
+    document.getElementById(
+      "liveTicker"
+    );
+
+  ticker.innerText =
+    activities[0];
+
+  setInterval(()=>{
+
+    index++;
+
+    if(index >= activities.length){
+      index = 0;
+    }
+
+    ticker.innerText =
+      activities[index];
+
+  },4000);
+
+}
+
+/* ================= PROFIT CALCULATOR ================= */
+
+function calculateProfit(){
+
+  const amount =
+    parseFloat(
+      document.getElementById(
+        "calcAmount"
+      ).value
+    );
+
+  const roi =
+    parseFloat(
+      document.getElementById(
+        "calcPlan"
+      ).value
+    );
+
+  if(!amount){
+
+    showToast("Enter amount");
+
+    return;
+
+  }
+
+  const daily =
+    (amount * roi) / 100;
+
+  const weekly =
+    daily * 7;
+
+  const monthly =
+    daily * 30;
+
+  document.getElementById(
+    "calcResult"
+  ).innerHTML = `
+
+    Daily Profit:
+    <b>$${daily.toFixed(2)}</b>
+
+    <br><br>
+
+    Weekly Profit:
+    <b>$${weekly.toFixed(2)}</b>
+
+    <br><br>
+
+    Monthly Profit:
+    <b>$${monthly.toFixed(2)}</b>
+
+  `;
+
+}
+
+/* ================= PDF RECEIPT ================= */
+
+function downloadReceipt(id){
+
+  const content = `
+
+GIKAZEE INVESTMENT RECEIPT
+
+Receipt ID: ${id}
+
+Generated:
+${new Date().toLocaleString()}
+
+Status: Successful
+
+Thank you for investing with GIKAZEE.
+
+  `;
+
+  const blob =
+    new Blob(
+      [content],
+      {type:"text/plain"}
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+
+  a.download =
+    `receipt-${id}.txt`;
+
+  a.click();
+
+}
+
+/* ================= PAYMENT DETAILS ================= */
+
+function showPaymentDetails(){
+
+  const method =
+    document.getElementById(
+      "payment_method"
+    ).value;
+
+  const paymentInfo =
+    document.getElementById(
+      "paymentInfo"
+    );
+
+  if(method === "Airtel Money"){
+
+    paymentInfo.innerHTML = `
+      Airtel: +260 976420985
+      name:    GIFT kamwaya
+    `;
+
+  }
+
+  else if(method === "MTN Money"){
+
+    paymentInfo.innerHTML = `
+      MTN:   +26 0762957569
+      name:  emmely kasambala
+    `;
+
+  }
+
+  else if(method === "USDT TRC20"){
+
+    paymentInfo.innerHTML = `
+      Wallet Address: TYWsRX1ayRfqo9pZj23qC1dSRRLXCtW19p
+    `;
+
+  }
+
+}
+
+/* ================= INVEST ================= */
+
+async function invest(){
+
+  const plan_id =
+    document.getElementById("plan").value;
+
+  const amount =
+    parseFloat(
+      document.getElementById("amount").value
+    );
+
+  if(!amount || amount <= 0){
+
+    showToast(
+      "Enter valid investment amount"
+    );
+
+    return;
+
+  }
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/invest",
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":token
+        },
+
+        body:JSON.stringify({
+
+          user_id,
+          plan_id,
+          amount
+
+        })
+
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    showToast(data.message);
+
+    if(data.success){
+
+      document.getElementById(
+        "amount"
+      ).value = "";
+
+      loadDashboard();
+
+    }
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+    showToast("Investment failed");
+
+  }
+
+}
+
+/* ================= DEPOSIT ================= */
+
+async function deposit(){
+
+  const amount =
+    parseFloat(
+      document.getElementById(
+        "depositAmount"
+      ).value
+    );
+
+  const payment_method =
+    document.getElementById(
+      "payment_method"
+    ).value;
+
+  const proof =
+    document.getElementById(
+      "proof"
+    ).files[0];
+
+  if(!amount || amount <= 0){
+
+    showToast(
+      "Enter valid deposit amount"
+    );
+
+    return;
+
+  }
+
+  if(
+    payment_method ===
+    "choose payment method"
+  ){
+
+    showToast(
+      "Select payment method"
+    );
+
+    return;
+
+  }
+
+  const formData =
+    new FormData();
+
+  formData.append(
+    "user_id",
+    user_id
+  );
+
+  formData.append(
+    "amount",
+    amount
+  );
+
+  formData.append(
+    "payment_method",
+    payment_method
+  );
+
+  formData.append(
+    "type",
+    "deposit"
+  );
+
+  if(proof){
+
+    formData.append(
+      "proof",
+      proof
+    );
+
+  }
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/deposit",
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Authorization":token
+        },
+
+        body:formData
+
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    showToast(data.message);
+
+    if(data.success){
+
+      document.getElementById(
+        "depositAmount"
+      ).value = "";
+
+      document.getElementById(
+        "proof"
+      ).value = "";
+
+      loadDashboard();
+
+    }
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+    showToast("Deposit failed");
+
+  }
+
+}
+
+/* ================= WITHDRAW ================= */
+
+async function withdrawal(){
+
+  const amount =
+    parseFloat(
+      document.getElementById(
+        "withdrawAmount"
+      ).value
+    );
+
+  const payment_method =
+    document.getElementById(
+      "withdraw_method"
+    ).value;
+
+  const payment_details =
+    document.getElementById(
+      "withdraw_details"
+    ).value.trim();
+
+  if(!amount || amount <= 0){
+
+    showToast(
+      "Enter valid withdrawal amount"
+    );
+
+    return;
+
+  }
+
+  if(!payment_details){
+
+    showToast(
+      "Enter payment details"
+    );
+
+    return;
+
+  }
+
+  try{
+
+    const res = await fetch(
+
+      "http://localhost:3001/api/withdraw",
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":token
+        },
+
+        body:JSON.stringify({
+
+          user_id,
+          amount,
+          payment_method,
+          payment_details
+
+        })
+
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    showToast(data.message);
+
+    if(data.success){
+
+      document.getElementById(
+        "withdrawAmount"
+      ).value = "";
+
+      document.getElementById(
+        "withdraw_details"
+      ).value = "";
+
+      loadDashboard();
+
+    }
+
+  }
+
+  catch(err){
+
+    console.log(err);
+
+    showToast("Withdrawal failed");
+
+  }
+
+}
+
+/* ================= UPDATE PROFILE ================= */
+
+async function updateProfile(){
+
+  showToast(
+    "Profile updated"
+  );
+
+}
+
+/* ================= TOAST ================= */
+
+function showToast(message){
+
+  const toast =
+    document.getElementById(
+      "toast"
+    );
+
+  toast.innerText =
+    message;
+
+  toast.style.display =
+    "block";
+
+  setTimeout(()=>{
+
+    toast.style.display =
+      "none";
+
+  },3000);
+
+}
+
+/* ================= REFERRAL ================= */
+
+function copyReferral(){
+
+  const code =
+    document.getElementById(
+      "referral"
+    ).innerText;
+
+  navigator.clipboard.writeText(code);
+
+  showToast(
+    "Referral copied"
+  );
+
+}
+
+/* ================= NOTIFICATIONS ================= */
+
+function toggleNotifications(){
+
+  const section =
+    document.getElementById(
+      "notificationSection"
+    );
+
+  if(
+    section.style.display === "none"
+  ){
+
+    section.style.display =
+      "block";
+
+  }else{
+
+    section.style.display =
+      "none";
+
+  }
+
+}
+
+/* ================= ANNOUNCEMENT ================= */
+
+async function loadAnnouncement(){
+
+  try{
+
+    const res = await fetch(
+      "http://localhost:3001/api/announcement"
+    );
+
+    const data =
+      await res.json();
+
+    const banner =
+      document.getElementById(
+        "announcementBanner"
+      );
+
+    if(
+      data.success &&
+      data.announcement
+    ){
+
+      banner.style.display =
+        "block";
+
+      banner.innerText =
+        "📢 " +
+        data.announcement.message;
+
+    }
+
+  }catch(err){
+
+    console.log(err);
+
+  }
+
+}
+
+/* ================= SIDEBAR ================= */
+
+function toggleSidebar(){
+
+  document
+    .getElementById("sidebar")
+    .classList.toggle("active");
+
+}
+
+/* ================= THEME ================= */
+
+function toggleTheme(){
+
+  document.body.classList.toggle(
+    "light"
+  );
+
+  if(
+    document.body.classList.contains(
+      "light"
+    )
+  ){
+
+    localStorage.setItem(
+      "theme",
+      "light"
+    );
+
+  }else{
+
+    localStorage.setItem(
+      "theme",
+      "dark"
+    );
+
+  }
+
+}
+
+const savedTheme =
+  localStorage.getItem("theme");
+
+if(savedTheme === "light"){
+
+  document.body.classList.add(
+    "light"
+  );
+
+}
+
+/* ================= LOGOUT ================= */
+
+function logout(){
+
+  localStorage.clear();
+
+  window.location.href =
+    "index.html";
+
+}
+
+/* ================= START ================= */
+
+showPaymentDetails();
+
+loadAnnouncement();
+
+loadDashboard();
+
+startROICountdown();
+
+startLiveTicker();
+
+setInterval(
+  loadDashboard,
+  15000
+);
+
+setInterval(
+  loadAnnouncement,
+  10000
+);
+
+</script>
+
+</body>
+</html>
