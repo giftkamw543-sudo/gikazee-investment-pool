@@ -280,6 +280,7 @@
   </div>
 
 </div>
+<script src="config.js"></script>
 
 <script>
 
@@ -407,8 +408,7 @@ async function register(){
   try{
 
     const res = await fetch(
-
-      "http://localhost:3001/api/register",
+      `${API_BASE}/api/register`,
 
       {
 
@@ -482,7 +482,7 @@ async function login(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/login",
+      `${API_BASE}/api/login`,
 
       {
 
@@ -561,7 +561,7 @@ async function loadAnnouncement(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/announcement"
+      `${API_BASE}/api/announcement`
 
     );
 

@@ -431,6 +431,8 @@ button:hover{
 
 <div id="toast"></div>
 
+<script src="config.js"></script>
+
 <script>
 
 const token =
@@ -451,7 +453,7 @@ async function verifyAdmin(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/verify",
+      `${API_BASE}/api/admin/verify`,
 
       {
         headers:{
@@ -509,7 +511,7 @@ async function loadStats(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/stats",
+      `${API_BASE}/api/admin/stats`,
 
       {
         headers:{
@@ -620,7 +622,7 @@ async function loadUsers(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/users",
+      `${API_BASE}/api/admin/users`,
 
       {
         headers:{
@@ -746,7 +748,7 @@ async function loadDeposits(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/pending",
+      `${API_BASE}/api/admin/pending`,
 
       {
         headers:{
@@ -843,7 +845,7 @@ async function loadWithdrawals(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/pending-withdrawals",
+      `${API_BASE}/api/admin/pending-withdrawals`,
 
       {
         headers:{
@@ -920,7 +922,7 @@ async function approve(id){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/approve",
+      `${API_BASE}/api/admin/approve`,
 
       {
 
@@ -967,7 +969,7 @@ async function rejectTx(id){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/reject",
+      `${API_BASE}/api/admin/reject`,
 
       {
 
@@ -1023,7 +1025,7 @@ async function postAnnouncement(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/admin/announcement",
+      `${API_BASE}/api/admin/announcement`,
 
       {
 
@@ -1066,7 +1068,7 @@ async function suspendUser(id){
 
   await fetch(
 
-    "http://localhost:3001/api/admin/suspend-user",
+    `${API_BASE}/api/admin/suspend-user`,
 
     {
 
@@ -1095,7 +1097,7 @@ async function activateUser(id){
 
   await fetch(
 
-    "http://localhost:3001/api/admin/activate-user",
+    `${API_BASE}/api/admin/activate-user`,
 
     {
 
@@ -1128,7 +1130,7 @@ async function deleteUser(id){
 
   await fetch(
 
-    "http://localhost:3001/api/admin/delete-user",
+    `${API_BASE}/api/admin/delete-user`,
 
     {
 
@@ -1173,7 +1175,7 @@ async function manageBalance(id){
 
   const res = await fetch(
 
-    "http://localhost:3001/api/admin/update-balance",
+    `${API_BASE}/api/admin/update-balance`,
 
     {
 

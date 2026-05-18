@@ -956,6 +956,7 @@
 <!-- TOAST -->
 
 <div id="toast"></div>
+<script src="config.js"></script>
 
 <script>
 
@@ -984,7 +985,7 @@ async function loadDashboard(){
 
     const res = await fetch(
 
-      `http://localhost:3001/api/dashboard/${user_id}`,
+      `${API_BASE}/api/dashboard/${user_id}`,
 
       {
         headers:{
@@ -1573,7 +1574,7 @@ async function invest(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/invest",
+      `${API_BASE}/api/invest`,
 
       {
 
@@ -1703,7 +1704,7 @@ async function deposit(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/deposit",
+      `${API_BASE}/api/deposit`,
 
       {
 
@@ -1795,7 +1796,7 @@ async function withdrawal(){
 
     const res = await fetch(
 
-      "http://localhost:3001/api/withdraw",
+      `${API_BASE}/api/withdraw`,
 
       {
 
@@ -1933,7 +1934,7 @@ async function loadAnnouncement(){
   try{
 
     const res = await fetch(
-      "http://localhost:3001/api/announcement"
+      `${API-BASE}/api/announcement`
     );
 
     const data =

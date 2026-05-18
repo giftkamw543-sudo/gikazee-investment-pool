@@ -1499,8 +1499,8 @@ function runDailyROI() {
 
 }
 
-// TEST EVERY 24 HOURS
-setInterval(runDailyROI,86400000);
+//-------test ervery 24 hou---------//
+setInterval(runDailyROI,86400000)
 
 // ================= VERIFY ADMIN =================
 
