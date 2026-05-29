@@ -1,1 +1,2 @@
-const API_BASE = "http://localhost:3001";
+const API_BASE =
+  "https://gikazee-investment-pool-production.up.railway.app";
