@@ -1753,6 +1753,22 @@ app.get("/test-plans", (req, res) => {
     res.json(results);
   });
 });
+app.get("/test-users", (req, res) => {
+  db.query("SELECT * FROM users", (err, results) => {
+    if (err) {
+      return res.json({
+        success: false,
+        error: err.message
+      });
+    }
+
+    res.json({
+      success: true,
+      count: results.length,
+      users: results
+    });
+  });
+});
 
 app.listen(process.env.PORT || 3001, () => {
   console.log(`Server running on port ${process.env.PORT || 3001}`);
