@@ -168,12 +168,16 @@ VALUES(?,?,?,?,?,?,?,?)`,
   ],
       (err) => {
 
-        if (err) {
-          return res.json({
-            success: false,
-            message: "Registration failed"
-          });
-        }
+       if (err) {
+
+  console.log("REGISTER ERROR:", err);
+
+  return res.json({
+    success: false,
+    message: err.sqlMessage || err.message
+  });
+
+}
 
         res.json({
           success: true,
