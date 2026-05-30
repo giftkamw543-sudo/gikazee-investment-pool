@@ -1743,6 +1743,13 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   res.send("All tables created successfully");
 
 });
+app.get("/test-plans", (req, res) => {
+  db.query("SELECT * FROM plans", (err, results) => {
+    if (err) return res.json(err);
+    res.json(results);
+  });
+});
+
 app.listen(process.env.PORT || 3001, () => {
   console.log(`Server running on port ${process.env.PORT || 3001}`);
 });
