@@ -1641,7 +1641,108 @@ app.get(
 );
 
 // ================= SERVER =================
+app.get("/create-tables", async (req, res) => {
 
+  const queries = [
+
+`CREATE TABLE IF NOT EXISTS users (
+id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(255) NOT NULL,
+email VARCHAR(255) UNIQUE NOT NULL,
+password VARCHAR(255) NOT NULL,
+phone VARCHAR(50),
+balance DECIMAL(15,2) DEFAULT 0,
+roi_total DECIMAL(15,2) DEFAULT 0,
+referral_earnings DECIMAL(15,2) DEFAULT 0,
+referral_code VARCHAR(100),
+referred_by VARCHAR(100),
+status VARCHAR(50) DEFAULT 'active',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+`CREATE TABLE IF NOT EXISTS plans (
+id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+min_amount DECIMAL(15,2) NOT NULL,
+max_amount DECIMAL(15,2) NOT NULL,
+daily_roi_percent DECIMAL(10,2) NOT NULL,
+duration_days INT NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+`CREATE TABLE IF NOT EXISTS investments (
+id INT AUTO_INCREMENT PRIMARY KEY,
+user_id INT NOT NULL,
+plan_id INT NOT NULL,
+amount DECIMAL(15,2) NOT NULL,
+status VARCHAR(50) DEFAULT 'active',
+start_date DATETIME,
+end_date DATETIME,
+last_roi_date DATETIME NULL,
+principal_returned TINYINT(1) DEFAULT 0,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+`CREATE TABLE IF NOT EXISTS transactions (
+id INT AUTO_INCREMENT PRIMARY KEY,
+user_id INT NOT NULL,
+type VARCHAR(50) NOT NULL,
+amount DECIMAL(15,2) NOT NULL,
+status VARCHAR(50) DEFAULT 'pending',
+payment_method VARCHAR(255),
+payment_details TEXT,
+proof_image VARCHAR(255),
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+`CREATE TABLE IF NOT EXISTS notifications (
+id INT AUTO_INCREMENT PRIMARY KEY,
+user_id INT NOT NULL,
+message TEXT NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+`CREATE TABLE IF NOT EXISTS announcements (
+id INT AUTO_INCREMENT PRIMARY KEY,
+message TEXT NOT NULL,
+status VARCHAR(50) DEFAULT 'active',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+`CREATE TABLE IF NOT EXISTS referral_commissions (
+id INT AUTO_INCREMENT PRIMARY KEY,
+referrer_user_id INT NOT NULL,
+referred_user_id INT NOT NULL,
+investment_id INT,
+amount DECIMAL(15,2) NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`
+
+  ];
+
+  for (const sql of queries) {
+    await new Promise((resolve, reject) => {
+      db.query(sql, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  db.query(
+    `INSERT INTO plans
+    (name,min_amount,max_amount,daily_roi_percent,duration_days)
+    VALUES
+    ('Starter',50,499,2,30),
+    ('Silver',500,1999,3,30),
+    ('Gold',2000,9999,4,30),
+    ('VIP',10000,1000000,5,30)`,
+    () => {}
+  );
+
+  res.send("All tables created successfully");
+
+});
 app.listen(process.env.PORT || 3001, () => {
   console.log(`Server running on port ${process.env.PORT || 3001}`);
 });
