@@ -2,1331 +2,747 @@
 <html lang="en">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIKAZEE ADMIN PANEL</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-<meta charset="UTF-8">
+    body {
+      background: #0f172a;
+      color: white;
+    }
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
-/>
+    /* ================= SIDEBAR ================= */
+    .sidebar {
+      width: 240px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: #111827;
+      padding-top: 20px;
+      overflow: auto;
+      transition: 0.3s;
+      z-index: 999;
+    }
 
-<title>GIKAZEE ADMIN PANEL</title>
+    .sidebar h2 {
+      text-align: center;
+      color: #38bdf8;
+      margin-bottom: 20px;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    .sidebar a {
+      display: block;
+      padding: 15px 20px;
+      color: #94a3b8;
+      text-decoration: none;
+      transition: 0.2s;
+    }
 
-<style>
+    .sidebar a:hover {
+      background: #1e293b;
+      color: white;
+    }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial;
-}
+    /* ================= MAIN ================= */
+    .main {
+      margin-left: 240px;
+      padding: 20px;
+    }
 
-body{
-  background:#0f172a;
-  color:white;
-}
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
 
-/* ================= SIDEBAR ================= */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
 
-.sidebar{
-  width:240px;
-  height:100vh;
-  position:fixed;
-  left:0;
-  top:0;
-  background:#111827;
-  padding-top:20px;
-  overflow:auto;
-  transition:0.3s;
-  z-index:999;
-}
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
 
-.sidebar h2{
-  text-align:center;
-  color:#38bdf8;
-  margin-bottom:20px;
-}
+    .card h3 {
+      color: #94a3b8;
+      margin-bottom: 10px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-.sidebar a{
-  display:block;
-  padding:15px;
-  color:white;
-  text-decoration:none;
-}
+    .card p {
+      font-size: 28px;
+      font-weight: bold;
+    }
 
-.sidebar a:hover{
-  background:#1e293b;
-}
+    .section {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
 
-/* ================= MAIN ================= */
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #38bdf8;
+    }
 
-.main{
-  margin-left:240px;
-  padding:20px;
-}
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 15px;
+    }
 
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:20px;
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-}
+    table th,
+    table td {
+      border: 1px solid #334155;
+      padding: 12px;
+      text-align: center;
+    }
 
-.card{
-  background:#1e293b;
-  padding:20px;
-  border-radius:15px;
-}
+    table th {
+      background: #111827;
+      color: #94a3b8;
+    }
 
-.card h3{
-  color:#94a3b8;
-  margin-bottom:10px;
-}
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #334155;
+      color: white;
+      margin-top: 10px;
+      outline: none;
+    }
 
-.card p{
-  font-size:28px;
-  font-weight:bold;
-}
+    input:focus,
+    textarea:focus {
+      border-color: #38bdf8;
+    }
 
-.section{
-  background:#1e293b;
-  padding:20px;
-  border-radius:15px;
-  margin-top:20px;
-}
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      margin: 3px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
-}
+    button:hover {
+      background: #1d4ed8;
+    }
 
-table th,
-table td{
-  border:1px solid #334155;
-  padding:10px;
-  text-align:center;
-}
+    .danger { background: #dc2626; }
+    .danger:hover { background: #b91c1c; }
+    .success { background: #16a34a; }
+    .success:hover { background: #15803d; }
+    .warning { background: #d97706; }
+    .warning:hover { background: #b45309; }
 
-input,
-textarea{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:#334155;
-  color:white;
-  margin-top:10px;
-}
+    .menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+      font-size: 22px;
+      background: #111827;
+      padding: 8px 12px;
+    }
 
-button{
-  padding:10px 15px;
-  border:none;
-  border-radius:8px;
-  background:#2563eb;
-  color:white;
-  cursor:pointer;
-  margin:3px;
-}
+    /* ================= MOBILE ================= */
+    @media(max-width:768px) {
+      .menu-btn { display: block; }
+      .sidebar { left: -260px; }
+      .sidebar.active { left: 0; }
+      .main { margin-left: 0; padding-top: 70px; }
+      .cards { grid-template-columns: 1fr; }
+      table { font-size: 12px; }
+    }
 
-button:hover{
-  background:#1d4ed8;
-}
-
-.danger{
-  background:#dc2626;
-}
-
-.success{
-  background:#16a34a;
-}
-
-.warning{
-  background:#f59e0b;
-}
-
-.menu-btn{
-  display:none;
-  position:fixed;
-  top:15px;
-  left:15px;
-  z-index:1000;
-  font-size:22px;
-}
-
-/* ================= MOBILE ================= */
-
-@media(max-width:768px){
-
-  .menu-btn{
-    display:block;
-  }
-
-  .sidebar{
-    left:-260px;
-  }
-
-  .sidebar.active{
-    left:0;
-  }
-
-  .main{
-    margin-left:0;
-    padding-top:70px;
-  }
-
-  .cards{
-    grid-template-columns:1fr;
-  }
-
-  table{
-    font-size:12px;
-  }
-
-}
-
-/* ================= TOAST ================= */
-
-#toast{
-  position:fixed;
-  top:20px;
-  right:20px;
-  background:#22c55e;
-  color:white;
-  padding:15px 20px;
-  border-radius:12px;
-  display:none;
-  z-index:99999;
-  font-weight:bold;
-  box-shadow:0 5px 15px rgba(0,0,0,0.3);
-}
-
-</style>
-
+    /* ================= TOAST ================= */
+    #toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #22c55e;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 12px;
+      display: none;
+      z-index: 99999;
+      font-weight: bold;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- ================= MENU BUTTON ================= -->
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-<button
-  class="menu-btn"
-  onclick="toggleSidebar()"
->
-☰
-</button>
-
-<!-- ================= SIDEBAR ================= -->
-
-<div
-  class="sidebar"
-  id="sidebar"
->
-
-  <h2>GIKAZEE ADMIN</h2>
-
-  <a href="#">Dashboard</a>
-
-  <a href="#usersSection">Users</a>
-
-  <a href="#depositSection">Deposits</a>
-
-  <a href="#withdrawSection">Withdrawals</a>
-
-  <a href="#announcementSection">Announcements</a>
-
-  <a href="#" onclick="logout()">
-    Logout
-  </a>
-
-</div>
-
-<!-- ================= MAIN ================= -->
-
-<div class="main">
-
-  <div class="topbar">
-
-    <h1>Admin Dashboard</h1>
-
-    <button onclick="loadEverything()">
-      Refresh
-    </button>
-
+  <div class="sidebar" id="sidebar">
+    <h2>GIKAZEE ADMIN</h2>
+    <a href="#">Dashboard</a>
+    <a href="#usersSection">Users</a>
+    <a href="#depositSection">Deposits</a>
+    <a href="#withdrawSection">Withdrawals</a>
+    <a href="#announcementSection">Announcements</a>
+    <a href="#" onclick="logout()">Logout</a>
   </div>
 
-  <!-- ================= STATS ================= -->
-
-  <div class="cards">
-
-    <div class="card">
-      <h3>Total Users</h3>
-      <p id="users">0</p>
+  <div class="main">
+    <div class="topbar">
+      <h1>Admin Dashboard</h1>
+      <button onclick="loadEverything()">Refresh Data</button>
     </div>
 
-    <div class="card">
-      <h3>Total Deposits</h3>
-      <p id="deposits">$0</p>
+    <div class="cards">
+      <div class="card">
+        <h3>Total Users</h3>
+        <p id="users">0</p>
+      </div>
+      <div class="card">
+        <h3>Total Deposits</h3>
+        <p id="deposits">$0.00</p>
+      </div>
+      <div class="card">
+        <h3>Total Withdrawals</h3>
+        <p id="withdrawals">$0.00</p>
+      </div>
+      <div class="card">
+        <h3>Active Investments</h3>
+        <p id="active">0</p>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Total Withdrawals</h3>
-      <p id="withdrawals">$0</p>
+    <div class="section">
+      <h2>Platform Analytics</h2>
+      <div style="position: relative; height:300px; width:100%">
+        <canvas id="analyticsChart"></canvas>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Active Investments</h3>
-      <p id="active">0</p>
+    <div class="section" id="announcementSection">
+      <h2>Post System Announcement</h2>
+      <textarea id="announcementText" rows="4" placeholder="Type information to stream onto client dashboards..."></textarea>
+      <button onclick="postAnnouncement()">Broadcast Announcement</button>
     </div>
 
+    <div class="section" id="usersSection">
+      <h2>User Account Management</h2>
+      <input id="searchUser" placeholder="Search accounts by name or email address..." onkeyup="searchUsers()" />
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Balance</th>
+              <th>Referral</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" id="depositSection">
+      <h2>Pending Deposit Approvals</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User ID</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Proof</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="depositTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" id="withdrawSection">
+      <h2>Pending Payout Requests</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User ID</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Details</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="withdrawTable"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- ================= ANALYTICS ================= -->
+  <div id="toast"></div>
 
-  <div class="section">
+  <script src="config.js"></script>
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "index.html";
+    }
 
-    <h2>Platform Analytics</h2>
-
-    <canvas id="analyticsChart"></canvas>
-
-  </div>
-
-  <!-- ================= ANNOUNCEMENT ================= -->
-
-  <div
-    class="section"
-    id="announcementSection"
-  >
-
-    <h2>Post Announcement</h2>
-
-    <textarea
-      id="announcementText"
-      rows="5"
-      placeholder="Write announcement..."
-    ></textarea>
-
-    <button onclick="postAnnouncement()">
-      Post Announcement
-    </button>
-
-  </div>
-
-  <!-- ================= USERS ================= -->
-
-  <div
-    class="section"
-    id="usersSection"
-  >
-
-    <h2>User Management</h2>
-
-    <input
-      id="searchUser"
-      placeholder="Search user..."
-      onkeyup="searchUsers()"
-    />
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Balance</th>
-          <th>Referral</th>
-          <th>Status</th>
-          <th>Actions</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="usersTable"></tbody>
-
-    </table>
-
-  </div>
-
-  <!-- ================= DEPOSITS ================= -->
-
-  <div
-    class="section"
-    id="depositSection"
-  >
-
-    <h2>Pending Deposits</h2>
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>ID</th>
-          <th>User</th>
-          <th>Amount</th>
-          <th>Method</th>
-          <th>Proof</th>
-          <th>Action</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="depositTable"></tbody>
-
-    </table>
-
-  </div>
-
-  <!-- ================= WITHDRAWALS ================= -->
-
-  <div
-    class="section"
-    id="withdrawSection"
-  >
-
-    <h2>Pending Withdrawals</h2>
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>ID</th>
-          <th>User</th>
-          <th>Amount</th>
-          <th>Method</th>
-          <th>Details</th>
-          <th>Action</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="withdrawTable"></tbody>
-
-    </table>
-
-  </div>
-
-</div>
-
-<!-- ================= TOAST ================= -->
-
-<div id="toast"></div>
-
-<script src="config.js"></script>
-
-<script>
-
-const token =
-  localStorage.getItem("token");
-
-if(!token){
-
-  window.location.href =
-    "index.html";
-
-}
-
-/* ================= VERIFY ADMIN ================= */
-
-async function verifyAdmin(){
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/verify`,
-
-      {
-        headers:{
-          "Authorization":token
+    /* ================= VERIFY ADMIN ================= */
+    async function verifyAdmin() {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/verify`, {
+          headers: { "Authorization": token }
+        });
+        const data = await res.json();
+        if (!data.success) {
+          localStorage.clear();
+          window.location.href = "index.html";
         }
+      } catch (err) {
+        console.error(err);
+        window.location.href = "index.html";
       }
+    }
 
-    );
+    /* ================= LOAD EVERYTHING ================= */
+    async function loadEverything() {
+      loadStats();
+      loadUsers();
+      loadDeposits();
+      loadWithdrawals();
+    }
 
-    const data = await res.json();
+    /* ================= STATS ================= */
+    let analyticsChart = null;
 
-    if(!data.success){
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/stats`, {
+          headers: { "Authorization": token }
+        });
+        const data = await res.json();
+        if (!data.success) return;
 
+        animateValue("users", data.stats.totalUsers);
+        animateMoney("deposits", data.stats.totalDeposits);
+        animateMoney("withdrawals", data.stats.totalWithdrawals);
+        animateValue("active", data.stats.activeInvestments);
+
+        createAnalytics(data.stats);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* ================= ANALYTICS ================= */
+    function createAnalytics(stats) {
+      const ctx = document.getElementById("analyticsChart").getContext("2d");
+      if (analyticsChart) {
+        analyticsChart.destroy();
+      }
+      analyticsChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Users", "Deposits ($)", "Withdrawals ($)", "Net Platform Balance ($)"],
+          datasets: [{
+            label: "Platform Metrics Summary",
+            data: [
+              stats.totalUsers,
+              stats.totalDeposits,
+              stats.totalWithdrawals,
+              stats.totalBalance || 0
+            ],
+            backgroundColor: [
+              'rgba(56, 189, 248, 0.6)',
+              'rgba(22, 163, 74, 0.6)',
+              'rgba(220, 38, 38, 0.6)',
+              'rgba(79, 70, 229, 0.6)'
+            ],
+            borderColor: [
+              '#38bdf8',
+              '#16a34a',
+              '#dc2626',
+              '#4f46e5'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: 'white' } }
+          },
+          scales: {
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+          }
+        }
+      });
+    }
+
+    /* ================= LOAD USERS ================= */
+    let allUsers = [];
+
+    async function loadUsers() {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/users`, {
+          headers: { "Authorization": token }
+        });
+        const data = await res.json();
+        allUsers = data.users || [];
+        renderUsers(allUsers);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* ================= RENDER USERS ================= */
+    function renderUsers(users) {
+      const table = document.getElementById("usersTable");
+      table.innerHTML = "";
+      users.forEach(user => {
+        table.innerHTML += `
+          <tr>
+            <td>${user.id}</td>
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>$${parseFloat(user.balance).toFixed(2)}</td>
+            <td>$${parseFloat(user.referral_earnings || 0).toFixed(2)}</td>
+            <td><span style="color: ${user.status === 'active' ? '#16a34a' : '#dc2626'}">${user.status}</span></td>
+            <td>
+              <button class="warning" onclick="suspendUser(${user.id})">Suspend</button>
+              <button class="success" onclick="activateUser(${user.id})">Activate</button>
+              <button class="danger" onclick="deleteUser(${user.id})">Delete</button>
+              <button onclick="manageBalance(${user.id})">Balance</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    /* ================= SEARCH USERS ================= */
+    function searchUsers() {
+      const keyword = document.getElementById("searchUser").value.toLowerCase();
+      const filtered = allUsers.filter(user =>
+        (user.name && user.name.toLowerCase().includes(keyword)) ||
+        (user.email && user.email.toLowerCase().includes(keyword))
+      );
+      renderUsers(filtered);
+    }
+
+    /* ================= LOAD DEPOSITS ================= */
+    async function loadDeposits() {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/pending`, {
+          headers: { "Authorization": token }
+        });
+        const data = await res.json();
+        const table = document.getElementById("depositTable");
+        table.innerHTML = "";
+        
+        if(data.transactions && data.transactions.length > 0) {
+          data.transactions.forEach(tx => {
+            table.innerHTML += `
+              <tr>
+                <td>${tx.id}</td>
+                <td>${tx.user_id}</td>
+                <td>$${parseFloat(tx.amount).toFixed(2)}</td>
+                <td>${tx.payment_method}</td>
+                <td>
+                  ${tx.proof_image 
+                    ? `<a href="${API_BASE}/uploads/${tx.proof_image}" target="_blank" style="color:#38bdf8; text-decoration:none; font-weight:bold;">View Proof</a>`
+                    : "No Proof Available"
+                  }
+                </td>
+                <td>
+                  <button class="success" onclick="approve(${tx.id})">Approve</button>
+                  <button class="danger" onclick="rejectTx(${tx.id})">Reject</button>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          table.innerHTML = `<tr><td colspan="6" style="color:#94a3b8;">No pending entry records available</td></tr>`;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* ================= LOAD WITHDRAWALS ================= */
+    async function loadWithdrawals() {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/pending-withdrawals`, {
+          headers: { "Authorization": token }
+        });
+        const data = await res.json();
+        const table = document.getElementById("withdrawTable");
+        table.innerHTML = "";
+
+        if(data.transactions && data.transactions.length > 0) {
+          data.transactions.forEach(tx => {
+            table.innerHTML += `
+              <tr>
+                <td>${tx.id}</td>
+                <td>${tx.user_id}</td>
+                <td>$${parseFloat(tx.amount).toFixed(2)}</td>
+                <td>${tx.payment_method}</td>
+                <td>${tx.payment_details || 'N/A'}</td>
+                <td>
+                  <button class="success" onclick="approve(${tx.id})">Approve</button>
+                  <button class="danger" onclick="rejectTx(${tx.id})">Reject</button>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          table.innerHTML = `<tr><td colspan="6" style="color:#94a3b8;">No payout processes matching criteria</td></tr>`;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* ================= APPROVE TRANSACTION ================= */
+    async function approve(id) {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/approve`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token
+          },
+          body: JSON.stringify({ transaction_id: id })
+        });
+        const data = await res.json();
+        showToast(data.message || "Transaction successfully processed!");
+        loadEverything();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* ================= REJECT TRANSACTION ================= */
+    async function rejectTx(id) {
+      if (!confirm("Are you certain you want to decline this operational request? Action cannot be reversed.")) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/reject`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token
+          },
+          body: JSON.stringify({ transaction_id: id })
+        });
+        const data = await res.json();
+        showToast(data.message || "Transaction rejected.");
+        loadEverything();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* ================= POST ANNOUNCEMENT ================= */
+    async function postAnnouncement() {
+      const message = document.getElementById("announcementText").value.trim();
+      if (!message) {
+        alert("Please write a meaningful update script before posting.");
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/announcement`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token
+          },
+          body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        showToast(data.message || "Announcement broadcasted!");
+        document.getElementById("announcementText").value = "";
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* ================= USER MANAGEMENT UTILITIES ================= */
+    async function suspendUser(id) {
+      try {
+        await fetch(`${API_BASE}/api/admin/suspend-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": token },
+          body: JSON.stringify({ user_id: id })
+        });
+        showToast("Target user successfully suspended.");
+        loadUsers();
+      } catch(err) { console.error(err); }
+    }
+
+    async function activateUser(id) {
+      try {
+        await fetch(`${API_BASE}/api/admin/activate-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": token },
+          body: JSON.stringify({ user_id: id })
+        });
+        showToast("Account status restored to Active.");
+        loadUsers();
+      } catch(err) { console.error(err); }
+    }
+
+    async function deleteUser(id) {
+      if (!confirm("Confirm termination of user records entirely? This step destroys user platform existence metrics.")) return;
+      try {
+        await fetch(`${API_BASE}/api/admin/delete-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": token },
+          body: JSON.stringify({ user_id: id })
+        });
+        showToast("User records completely purged.");
+        loadUsers();
+      } catch(err) { console.error(err); }
+    }
+
+    async function manageBalance(id) {
+      const action = prompt("Specify allocation mutation directive ('add' or 'remove'):");
+      if (!action || (action !== 'add' && action !== 'remove')) {
+        alert("Operation aborted. Invalid directive supplied.");
+        return;
+      }
+      const amount = prompt("Input precise base settlement parameter metric amount:");
+      if (!amount || isNaN(amount)) {
+        alert("Operation aborted. Please check asset numerical precision inputs.");
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/update-balance`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": token },
+          body: JSON.stringify({ user_id: id, amount, action })
+        });
+        const data = await res.json();
+        showToast(data.message || "Balance adjusted successfully.");
+        loadUsers();
+      } catch(err) { console.error(err); }
+    }
+
+    /* ================= VALUE METRIC COUNTER ANIMATIONS ================= */
+    function animateValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let start = 0;
+      const target = parseInt(value) || 0;
+      if(target === 0) { el.innerText = "0"; return; }
+      const duration = 1000;
+      const frameRate = 1000 / 60;
+      const step = target / (duration / frameRate);
+
+      const timer = setInterval(() => {
+        start += step;
+        if (start >= target) {
+          el.innerText = target;
+          clearInterval(timer);
+        } else {
+          el.innerText = Math.floor(start);
+        }
+      }, frameRate);
+    }
+
+    function animateMoney(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let start = 0;
+      const target = parseFloat(value) || 0;
+      if(target === 0) { el.innerText = "$0.00"; return; }
+      const duration = 1000;
+      const frameRate = 1000 / 60;
+      const step = target / (duration / frameRate);
+
+      const timer = setInterval(() => {
+        start += step;
+        if (start >= target) {
+          el.innerText = "$" + target.toFixed(2);
+          clearInterval(timer);
+        } else {
+          el.innerText = "$" + start.toFixed(2);
+        }
+      }, frameRate);
+    }
+
+    /* ================= TOAST SYSTEM ================= */
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 3000);
+    }
+
+    /* ================= LAYOUT WRAPPERS ================= */
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    function logout() {
       localStorage.clear();
-
-      window.location.href =
-        "index.html";
-
+      window.location.href = "index.html";
     }
 
-  }
-
-  catch(err){
-
-    console.log(err);
-
-    window.location.href =
-      "index.html";
-
-  }
-
-}
-
-/* ================= LOAD EVERYTHING ================= */
-
-async function loadEverything(){
-
-  loadStats();
-
-  loadUsers();
-
-  loadDeposits();
-
-  loadWithdrawals();
-
-}
-
-/* ================= STATS ================= */
-
-let analyticsChart = null;
-
-async function loadStats(){
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/stats`,
-
-      {
-        headers:{
-          "Authorization":token
-        }
-      }
-
-    );
-
-    const data = await res.json();
-
-    if(!data.success){
-      return;
-    }
-
-    animateValue(
-      "users",
-      data.stats.totalUsers
-    );
-
-    animateMoney(
-      "deposits",
-      data.stats.totalDeposits
-    );
-
-    animateMoney(
-      "withdrawals",
-      data.stats.totalWithdrawals
-    );
-
-    animateValue(
-      "active",
-      data.stats.activeInvestments
-    );
-
-    createAnalytics(data.stats);
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-}
-
-/* ================= ANALYTICS ================= */
-
-function createAnalytics(stats){
-
-  const ctx =
-    document.getElementById(
-      "analyticsChart"
-    );
-
-  if(analyticsChart){
-
-    analyticsChart.destroy();
-
-  }
-
-  analyticsChart =
-    new Chart(ctx,{
-
-      type:"bar",
-
-      data:{
-
-        labels:[
-          "Users",
-          "Deposits",
-          "Withdrawals",
-          "Balance"
-        ],
-
-        datasets:[{
-
-          label:"Platform Data",
-
-          data:[
-
-            stats.totalUsers,
-
-            stats.totalDeposits,
-
-            stats.totalWithdrawals,
-
-            stats.totalBalance || 0
-
-          ]
-
-        }]
-
-      }
-
-    });
-
-}
-
-/* ================= LOAD USERS ================= */
-
-let allUsers = [];
-
-async function loadUsers(){
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/users`,
-
-      {
-        headers:{
-          "Authorization":token
-        }
-      }
-
-    );
-
-    const data = await res.json();
-
-    allUsers = data.users || [];
-
-    renderUsers(allUsers);
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-}
-
-/* ================= RENDER USERS ================= */
-
-function renderUsers(users){
-
-  const table =
-    document.getElementById(
-      "usersTable"
-    );
-
-  table.innerHTML = "";
-
-  users.forEach(user => {
-
-    table.innerHTML += `
-
-      <tr>
-
-        <td>${user.id}</td>
-
-        <td>${user.name}</td>
-
-        <td>${user.email}</td>
-
-        <td>$${user.balance}</td>
-
-        <td>$${user.referral_earnings || 0}</td>
-
-        <td>${user.status}</td>
-
-        <td>
-
-          <button
-            class="warning"
-            onclick="suspendUser(${user.id})"
-          >
-            Suspend
-          </button>
-
-          <button
-            class="success"
-            onclick="activateUser(${user.id})"
-          >
-            Activate
-          </button>
-
-          <button
-            class="danger"
-            onclick="deleteUser(${user.id})"
-          >
-            Delete
-          </button>
-
-          <button
-            onclick="manageBalance(${user.id})"
-          >
-            Balance
-          </button>
-
-        </td>
-
-      </tr>
-
-    `;
-
-  });
-
-}
-
-/* ================= SEARCH USERS ================= */
-
-function searchUsers(){
-
-  const keyword =
-    document.getElementById(
-      "searchUser"
-    ).value.toLowerCase();
-
-  const filtered =
-    allUsers.filter(user =>
-
-      user.name.toLowerCase().includes(keyword)
-
-      ||
-
-      user.email.toLowerCase().includes(keyword)
-
-    );
-
-  renderUsers(filtered);
-
-}
-
-/* ================= LOAD DEPOSITS ================= */
-
-async function loadDeposits(){
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/pending`,
-
-      {
-        headers:{
-          "Authorization":token
-        }
-      }
-
-    );
-
-    const data = await res.json();
-
-    const table =
-      document.getElementById(
-        "depositTable"
-      );
-
-    table.innerHTML = "";
-
-    data.transactions.forEach(tx => {
-
-      table.innerHTML += `
-
-        <tr>
-
-          <td>${tx.id}</td>
-
-          <td>${tx.user_id}</td>
-
-          <td>$${tx.amount}</td>
-
-          <td>${tx.payment_method}</td>
-
-          <td>
-
-            ${
-              tx.proof_image
-
-              ?
-
-              `<a
-                href="${API_BASE}/uploads/${tx.proof_image}"
-                target="_blank"
-                style="color:#38bdf8;"
-              >
-                View Proof
-              </a>`
-
-              :
-
-              "No Proof"
-            }
-
-          </td>
-
-          <td>
-
-            <button
-              class="success"
-              onclick="approve(${tx.id})"
-            >
-              Approve
-            </button>
-
-            <button
-              class="danger"
-              onclick="rejectTx(${tx.id})"
-            >
-              Reject
-            </button>
-
-          </td>
-
-        </tr>
-
-      `;
-
-    });
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-}
-
-/* ================= LOAD WITHDRAWALS ================= */
-
-async function loadWithdrawals(){
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/pending-withdrawals`,
-
-      {
-        headers:{
-          "Authorization":token
-        }
-      }
-
-    );
-
-    const data = await res.json();
-
-    const table =
-      document.getElementById(
-        "withdrawTable"
-      );
-
-    table.innerHTML = "";
-
-    data.transactions.forEach(tx => {
-
-      table.innerHTML += `
-
-        <tr>
-
-          <td>${tx.id}</td>
-
-          <td>${tx.user_id}</td>
-
-          <td>$${tx.amount}</td>
-
-          <td>${tx.payment_method}</td>
-
-          <td>${tx.payment_details}</td>
-
-          <td>
-
-            <button
-              class="success"
-              onclick="approve(${tx.id})"
-            >
-              Approve
-            </button>
-
-            <button
-              class="danger"
-              onclick="rejectTx(${tx.id})"
-            >
-              Reject
-            </button>
-
-          </td>
-
-        </tr>
-
-      `;
-
-    });
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-}
-
-/* ================= APPROVE ================= */
-
-async function approve(id){
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/approve`,
-
-      {
-
-        method:"POST",
-
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":token
-        },
-
-        body:JSON.stringify({
-          transaction_id:id
-        })
-
-      }
-
-    );
-
-    const data = await res.json();
-
-    showToast(data.message);
-
+    /* ================= APPLICATION INITIALIZATION RUNNERS ================= */
+    verifyAdmin();
     loadEverything();
 
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-}
-
-/* ================= REJECT ================= */
-
-async function rejectTx(id){
-
-  if(!confirm("Reject transaction?")){
-    return;
-  }
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/reject`,
-
-      {
-
-        method:"POST",
-
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":token
-        },
-
-        body:JSON.stringify({
-          transaction_id:id
-        })
-
-      }
-
-    );
-
-    const data = await res.json();
-
-    showToast(data.message);
-
-    loadEverything();
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-}
-
-/* ================= POST ANNOUNCEMENT ================= */
-
-async function postAnnouncement(){
-
-  const message =
-    document.getElementById(
-      "announcementText"
-    ).value.trim();
-
-  if(!message){
-
-    alert("Write announcement");
-
-    return;
-
-  }
-
-  try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/admin/announcement`,
-
-      {
-
-        method:"POST",
-
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":token
-        },
-
-        body:JSON.stringify({
-          message
-        })
-
-      }
-
-    );
-
-    const data = await res.json();
-
-    showToast(data.message);
-
-    document.getElementById(
-      "announcementText"
-    ).value = "";
-
-  }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
-}
-
-/* ================= USER ACTIONS ================= */
-
-async function suspendUser(id){
-
-  await fetch(
-
-    `${API_BASE}/api/admin/suspend-user`,
-
-    {
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":token
-      },
-
-      body:JSON.stringify({
-        user_id:id
-      })
-
-    }
-
-  );
-
-  showToast("User suspended");
-
-  loadUsers();
-
-}
-
-async function activateUser(id){
-
-  await fetch(
-
-    `${API_BASE}/api/admin/activate-user`,
-
-    {
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":token
-      },
-
-      body:JSON.stringify({
-        user_id:id
-      })
-
-    }
-
-  );
-
-  showToast("User activated");
-
-  loadUsers();
-
-}
-
-async function deleteUser(id){
-
-  if(!confirm("Delete user?")){
-    return;
-  }
-
-  await fetch(
-
-    `${API_BASE}/api/admin/delete-user`,
-
-    {
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":token
-      },
-
-      body:JSON.stringify({
-        user_id:id
-      })
-
-    }
-
-  );
-
-  showToast("User deleted");
-
-  loadUsers();
-
-}
-
-/* ================= BALANCE ================= */
-
-async function manageBalance(id){
-
-  const action =
-    prompt("Type add or remove");
-
-  if(!action){
-    return;
-  }
-
-  const amount =
-    prompt("Enter amount");
-
-  if(!amount){
-    return;
-  }
-
-  const res = await fetch(
-
-    `${API_BASE}/api/admin/update-balance`,
-
-    {
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":token
-      },
-
-      body:JSON.stringify({
-
-        user_id:id,
-        amount,
-        action
-
-      })
-
-    }
-
-  );
-
-  const data = await res.json();
-
-  showToast(data.message);
-
-  loadUsers();
-
-}
-
-/* ================= ANIMATE ================= */
-
-function animateValue(id, value){
-
-  const el =
-    document.getElementById(id);
-
-  let start = 0;
-
-  const step =
-    value / 50;
-
-  const timer = setInterval(()=>{
-
-    start += step;
-
-    if(start >= value){
-
-      start = value;
-
-      clearInterval(timer);
-
-    }
-
-    el.innerText =
-      Math.floor(start);
-
-  },20);
-
-}
-
-function animateMoney(id, value){
-
-  const el =
-    document.getElementById(id);
-
-  let start = 0;
-
-  const step =
-    value / 50;
-
-  const timer = setInterval(()=>{
-
-    start += step;
-
-    if(start >= value){
-
-      start = value;
-
-      clearInterval(timer);
-
-    }
-
-    el.innerText =
-      "$" + start.toFixed(2);
-
-  },20);
-
-}
-
-/* ================= TOAST ================= */
-
-function showToast(message){
-
-  const toast =
-    document.getElementById(
-      "toast"
-    );
-
-  toast.innerText = message;
-
-  toast.style.display = "block";
-
-  setTimeout(()=>{
-
-    toast.style.display = "none";
-
-  },3000);
-
-}
-
-/* ================= SIDEBAR ================= */
-
-function toggleSidebar(){
-
-  document
-    .getElementById("sidebar")
-    .classList.toggle("active");
-
-}
-
-/* ================= LOGOUT ================= */
-
-function logout(){
-
-  localStorage.clear();
-
-  window.location.href =
-    "index.html";
-
-}
-
-/* ================= START ================= */
-
-verifyAdmin();
-
-loadEverything();
-
-/* ================= AUTO REFRESH ================= */
-
-setInterval(()=>{
-
-  loadStats();
-
-  loadDeposits();
-
-  loadWithdrawals();
-
-},15000);
-
-</script>
-
+    /* ================= RELIABLE INTERVAL BACKSTORY DAEMONS ================= */
+    setInterval(() => {
+      loadStats();
+      loadDeposits();
+      loadWithdrawals();
+    }, 15000);
+  </script>
 </body>
 </html>

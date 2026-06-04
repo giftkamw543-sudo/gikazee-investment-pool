@@ -1,316 +1,260 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-
+  <meta charset="UTF-8">
   <title>Transaction History</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-
-    body{
-      margin:0;
-      font-family:Arial;
-      background:#0f172a;
-      color:white;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
 
-    .sidebar{
-      width:230px;
-      height:100vh;
-      position:fixed;
-      background:#111827;
-      padding-top:20px;
+    body {
+      background: #0f172a;
+      color: white;
     }
 
-    .sidebar h2{
-      text-align:center;
-      color:#38bdf8;
+    /* ================= SIDEBAR ================= */
+    .sidebar {
+      width: 230px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: #111827;
+      padding-top: 20px;
+      transition: 0.3s ease;
+      z-index: 999;
     }
 
-    .sidebar a{
-      display:block;
-      padding:15px;
-      color:white;
-      text-decoration:none;
+    .sidebar h2 {
+      text-align: center;
+      color: #38bdf8;
+      margin-bottom: 20px;
     }
 
-    .sidebar a:hover{
-      background:#1e293b;
+    .sidebar a {
+      display: block;
+      padding: 15px 20px;
+      color: #94a3b8;
+      text-decoration: none;
+      transition: 0.2s;
     }
 
-    .main{
-      margin-left:230px;
-      padding:20px;
+    .sidebar a:hover {
+      background: #1e293b;
+      color: white;
     }
 
-    .section{
-      background:#1e293b;
-      padding:20px;
-      border-radius:15px;
+    /* ================= MAIN LAYOUT ================= */
+    .main {
+      margin-left: 230px;
+      padding: 20px;
+      transition: 0.3s ease;
     }
 
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:20px;
+    .section {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .section h2 {
+      margin-bottom: 15px;
+      color: #38bdf8;
+      font-size: 20px;
+    }
+
+    /* ================= RESPONSIVE TABLE ================= */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
     }
 
     table th,
-    table td{
-      border:1px solid #334155;
-      padding:12px;
-      text-align:center;
+    table td {
+      border: 1px solid #334155;
+      padding: 12px;
+      text-align: center;
     }
 
-    .pending{
-      color:orange;
-      font-weight:bold;
+    table th {
+      background: #111827;
+      color: #94a3b8;
     }
 
-    .approved{
-      color:lime;
-      font-weight:bold;
+    /* ================= STATUS BADGES ================= */
+    .pending {
+      color: #f59e0b;
+      font-weight: bold;
+      text-transform: capitalize;
     }
 
-    .rejected{
-      color:red;
-      font-weight:bold;
+    .approved {
+      color: #22c55e;
+      font-weight: bold;
+      text-transform: capitalize;
     }
 
-    @media(max-width:768px){
+    .rejected {
+      color: #ef4444;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
 
-      .sidebar{
-        width:100%;
-        height:auto;
-        position:relative;
+    /* ================= INTERACTION BUTTONS ================= */
+    .menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 15px;
+      border-radius: 8px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .menu-btn:hover {
+      background: #1d4ed8;
+    }
+
+    /* ================= MOBILE BREAKPOINT ================= */
+    @media(max-width:768px) {
+      .menu-btn {
+        display: block;
       }
 
-      .main{
-        margin-left:0;
+      .sidebar {
+        left: -250px;
       }
 
-      table{
-        font-size:12px;
+      .sidebar.active {
+        left: 0;
       }
 
+      .main {
+        margin-left: 0;
+        padding-top: 70px;
+      }
+
+      table {
+        font-size: 12px;
+      }
     }
+  </style>
+</head>
 
-    /* ================= MOBILE MENU ================= */
-
-.menu-btn{
-
-  display:none;
-
-  position:fixed;
-
-  top:15px;
-
-  left:15px;
-
-  z-index:1000;
-
-  background:#2563eb;
-
-  color:white;
-
-  border:none;
-
-  padding:12px 15px;
-
-  border-radius:8px;
-
-  font-size:22px;
-
-}
-
-@media(max-width:768px){
-
-  .menu-btn{
-    display:block;
-  }
-
-  .sidebar{
-
-    left:-250px;
-
-    transition:0.3s;
-
-    z-index:999;
-
-  }
-
-  .sidebar.active{
-    left:0;
-  }
-
-  .main{
-
-    margin-left:0;
-
-    padding-top:70px;
-
-  }
-
-  .cards{
-
-    grid-template-columns:1fr;
-
-  }
-
-  table{
-    font-size:12px;
-  }
-
-}
-
-</style>
 <body>
 
-  <button class="menu-btn" onclick="toggleSidebar()">
-  ☰
-</button>
-<div class="sidebar" id="sidebar">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-  <h2>GIKAZEE</h2>
-
-  <a href="dashboard.html">Dashboard</a>
-
-  <a href="transactions.html">
-    Transactions
-  </a>
-
-  <a href="#" onclick="logout()">
-    Logout
-  </a>
-
-</div>
-
-<div class="main">
-
-  <div class="section">
-
-    <h2>Transaction History</h2>
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>ID</th>
-
-          <th>Type</th>
-
-          <th>Amount</th>
-
-          <th>Method</th>
-
-          <th>Status</th>
-
-          <th>Date</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="table"></tbody>
-
-    </table>
-
+  <div class="sidebar" id="sidebar">
+    <h2>GIKAZEE</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transactions.html">Transactions</a>
+    <a href="#" onclick="logout()">Logout</a>
   </div>
 
-</div>
+  <div class="main">
+    <div class="section">
+      <h2>Transaction History</h2>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="table"></tbody>
+        </table>
+      </div>
 
-<script src="config.js"></script>
+    </div>
+  </div>
 
-<script>
+  <script src="config.js"></script>
+  <script>
+    const user_id = localStorage.getItem("user_id");
+    const token = localStorage.getItem("token");
 
-const user_id =
-  localStorage.getItem("user_id");
+    if (!token) {
+      window.location.href = "index.html";
+    }
 
-const token =
-  localStorage.getItem("token");
+    /* ================= LOAD TRANSACTIONS ================= */
+    async function loadTransactions() {
+      try {
+        const res = await fetch(`${API_BASE}/api/transactions/${user_id}`, {
+          headers: {
+            "Authorization": token
+          }
+        });
+        
+        const data = await res.json();
+        const table = document.getElementById("table");
+        table.innerHTML = "";
 
-if(!token){
+        if (data.transactions && data.transactions.length > 0) {
+          data.transactions.forEach(tx => {
+            table.innerHTML += `
+              <tr>
+                <td>${tx.id}</td>
+                <td style="text-transform: uppercase; font-weight: 500;">${tx.type}</td>
+                <td>$${parseFloat(tx.amount).toFixed(2)}</td>
+                <td>${tx.payment_method || "-"}</td>
+                <td>
+                  <span class="${tx.status.toLowerCase()}">
+                    ${tx.status}
+                  </span>
+                </td>
+                <td>${new Date(tx.created_at).toLocaleString()}</td>
+              </tr>
+            `;
+          });
+        } else {
+          table.innerHTML = `<tr><td colspan="6" style="color: #94a3b8;">No transactions found.</td></tr>`;
+        }
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+        document.getElementById("table").innerHTML = `<tr><td colspan="6" style="color: #ef4444;">Failed to load data.</td></tr>`;
+      }
+    }
 
-  window.location.href =
-  "index.html";
+    /* ================= VIEWPORT CONTROLS ================= */
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
 
-}
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
 
-async function loadTransactions(){
-
-  const res = await fetch(
-    `${API_BASE}/api/transactions/${user_id}`
-  );
-
-  const data = await res.json();
-
-  const table =
-    document.getElementById("table");
-
-  table.innerHTML = "";
-
-  data.transactions.forEach(tx => {
-
-    table.innerHTML += `
-
-      <tr>
-
-        <td>${tx.id}</td>
-
-        <td>${tx.type}</td>
-
-        <td>$${tx.amount}</td>
-
-        <td>${tx.payment_method || "-"}</td>
-
-        <td>
-
-  <span class="${tx.status}">
-
-    ${tx.status}
-
-  </span>
-
-</td>
-
-        <td>
-          ${new Date(tx.created_at)
-          .toLocaleString()}
-        </td>
-
-      </tr>
-
-    `;
-
-  });
-
-}
-
-function toggleSidebar(){
-
-  document
-  .getElementById("sidebar")
-  .classList.toggle("active");
-
-}
-
-function logout(){
-
-  localStorage.clear();
-
-  window.location.href =
-  "index.html";
-
-}
-
-loadTransactions();
-
-</script>
+    // Run on boot
+    loadTransactions();
+  </script>
 
 </body>
-
 </html>

@@ -1,597 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GIKAZEE Investment</title>
-
   <style>
-
     *{
       margin:0;
       padding:0;
       box-sizing:border-box;
-      font-family:Arial;
+      font-family:Arial, sans-serif;
     }
   
     body{
       background: #0f172a;
-      color:rgb(255, 255, 255);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:100vh;
-      padding:20px;
+      color: rgb(255, 255, 255);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
     }
 
     .container{
-      width:100%;
-      max-width:420px;
-      background:#1e293b;
-      border-radius:20px;
-      padding:30px;
-      box-shadow:0 0 25px rgba(0,0,0,0.4);
+      width: 100%;
+      max-width: 420px;
+      background: #1e293b;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
     }
 
     .logo{
-      text-align:center;
-      margin-bottom:25px;
+      text-align: center;
+      margin-bottom: 25px;
     }
 
     .logo h1{
-      color:#38bdf8;
-      font-size:32px;
+      color: #38bdf8;
+      font-size: 32px;
     }
 
     .logo p{
-      color:#94a3b8;
-      margin-top:5px;
+      color: #94a3b8;
+      margin-top: 5px;
     }
 
     .tabs{
-      display:flex;
-      margin-bottom:20px;
-      background:#0f172a;
-      border-radius:10px;
-      overflow:hidden;
+      display: flex;
+      margin-bottom: 20px;
+      background: #0f172a;
+      border-radius: 10px;
+      overflow: hidden;
     }
 
     .tabs button{
-      flex:1;
-      padding:14px;
-      border:none;
-      background:transparent;
-      color:white;
-      cursor:pointer;
-      font-size:15px;
+      flex: 1;
+      padding: 14px;
+      border: none;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
     }
 
     .tabs button.active{
-      background:#2563eb;
+      background: #2563eb;
     }
 
     .form{
-      display:none;
+      display: none;
     }
 
     .form.active{
-      display:block;
+      display: block;
     }
 
     input{
-      width:100%;
-      padding:14px;
-      margin-top:12px;
-      border:none;
-      border-radius:10px;
-      background:#334155;
-      color:white;
-      font-size:15px;
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #334155;
+      color: white;
+      font-size: 15px;
     }
 
     button.submit{
-      width:100%;
-      padding:14px;
-      margin-top:18px;
-      border:none;
-      border-radius:10px;
-      background:#2563eb;
-      color:white;
-      font-size:16px;
-      cursor:pointer;
-      transition:0.3s;
+      width: 100%;
+      padding: 14px;
+      margin-top: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
     button.submit:hover{
-      background:#1d4ed8;
+      background: #1d4ed8;
     }
 
     .terms-box{
-      margin-top:15px;
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      font-size:14px;
-      line-height:1.5;
+      margin-top: 15px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .terms-box input{
-      width:auto;
-      margin-top:3px;
+      width: auto;
+      margin-top: 3px;
     }
 
     .terms-box a{
-      color:#38bdf8;
-      text-decoration:none;
+      color: #38bdf8;
+      text-decoration: none;
     }
 
     .announcement{
-      background:#2563eb;
-      padding:12px;
-      border-radius:10px;
-      margin-bottom:20px;
-      text-align:center;
-      font-size:14px;
+      background: #2563eb;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 14px;
     }
-
   </style>
-
 </head>
+<body>
 
 <div class="container">
-
-  <!-- ================= LOGO ================= -->
-
   <div class="logo">
-
     <h1>GIKAZEE</h1>
-
     <p>Smart Investment Platform</p>
-
   </div>
 
-  <!-- ================= ANNOUNCEMENT ================= -->
-
-  <div
-    class="announcement"
-    id="announcement"
-  >
-
+  <div class="announcement" id="announcement">
     Welcome to GIKAZEE Investment Platform
-
   </div>
-
-  <!-- ================= TABS ================= -->
 
   <div class="tabs">
-
-    <button
-      id="loginTab"
-      class="active"
-      onclick="showLogin()"
-    >
-      Login
-    </button>
-
-    <button
-      id="registerTab"
-      onclick="showRegister()"
-    >
-      Register
-    </button>
-
+    <button id="loginTab" class="active" onclick="showLogin()">Login</button>
+    <button id="registerTab" onclick="showRegister()">Register</button>
   </div>
 
-  <!-- ================= LOGIN ================= -->
-
-  <div
-    id="loginForm"
-    class="form active"
-  >
-
-    <input
-      id="email"
-      type="email"
-      placeholder="Email Address"
-    >
-
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-    >
-
-    <button
-      class="submit"
-      onclick="login()"
-    >
-      Login
-    </button>
-
+  <div id="loginForm" class="form active">
+    <input id="email" type="email" placeholder="Email Address">
+    <input id="password" type="password" placeholder="Password">
+    <button class="submit" onclick="login()">Login</button>
   </div>
 
-  <!-- ================= REGISTER ================= -->
-
-  <div
-    id="registerForm"
-    class="form"
-  >
-
-    <input
-      id="registerName"
-      placeholder="Full Name"
-    >
-
-    <input
-      id="registerEmail"
-      type="email"
-      placeholder="Email Address"
-    >
-
-    <input
-      id="registerPassword"
-      type="password"
-      placeholder="Password"
-    >
-
-    <input
-      id="referralCode"
-      placeholder="Referral Code (Optional)"
-    >
-
-    <!-- ================= TERMS ================= -->
+  <div id="registerForm" class="form">
+    <input id="registerName" placeholder="Full Name">
+    <input id="registerEmail" type="email" placeholder="Email Address">
+    <input id="registerPassword" type="password" placeholder="Password">
+    <input id="referralCode" placeholder="Referral Code (Optional)">
 
     <div class="terms-box">
-
-      <input
-        type="checkbox"
-        id="terms"
-      >
-
+      <input type="checkbox" id="terms">
       <label for="terms">
-
-        I agree to the
-
-        <a
-          href="terms.html"
-          target="_blank"
-        >
-          Terms & Conditions
-        </a>
-
+        I agree to the <a href="terms.html" target="_blank">Terms & Conditions</a>
       </label>
-
     </div>
 
-    <button
-      class="submit"
-      onclick="register()"
-    >
-      Create Account
-    </button>
-
+    <button class="submit" onclick="register()">Create Account</button>
   </div>
-
 </div>
-<script src="config.js"></script>
 
+<script src="config.js"></script>
 <script>
+/* ================= CONFIG FALLBACK ================= */
+// If config.js fails to load or is missing, use production fallback
+if (typeof API_BASE === 'undefined') {
+    var API_BASE = "https://gikazee-investment-pool-production.up.railway.app";
+}
 
 /* ================= REFERRAL LINK ================= */
-
-const params =
-  new URLSearchParams(
-    window.location.search
-  );
-
-const ref =
-  params.get("ref");
+const params = new URLSearchParams(window.location.search);
+const ref = params.get("ref");
 
 if(ref){
-
   showRegister();
-
   setTimeout(() => {
-
-    document.getElementById(
-      "referralCode"
-    ).value = ref;
-
+    document.getElementById("referralCode").value = ref;
   }, 100);
-
 }
 
-/* ================= SHOW LOGIN ================= */
-
+/* ================= NAVIGATION CONTROLS ================= */
 function showLogin(){
-
-  document
-  .getElementById("loginForm")
-  .classList.add("active");
-
-  document
-  .getElementById("registerForm")
-  .classList.remove("active");
-
-  document
-  .getElementById("loginTab")
-  .classList.add("active");
-
-  document
-  .getElementById("registerTab")
-  .classList.remove("active");
-
+  document.getElementById("loginForm").classList.add("active");
+  document.getElementById("registerForm").classList.remove("active");
+  document.getElementById("loginTab").classList.add("active");
+  document.getElementById("registerTab").classList.remove("active");
 }
-
-/* ================= SHOW REGISTER ================= */
 
 function showRegister(){
-
-  document
-  .getElementById("registerForm")
-  .classList.add("active");
-
-  document
-  .getElementById("loginForm")
-  .classList.remove("active");
-
-  document
-  .getElementById("registerTab")
-  .classList.add("active");
-
-  document
-  .getElementById("loginTab")
-  .classList.remove("active");
-
+  document.getElementById("registerForm").classList.add("active");
+  document.getElementById("loginForm").classList.remove("active");
+  document.getElementById("registerTab").classList.add("active");
+  document.getElementById("loginTab").classList.remove("active");
 }
 
-/* ================= REGISTER ================= */
-
+/* ================= REGISTRATION ENGINE ================= */
 async function register(){
-
-  const terms =
-    document.getElementById(
-      "terms"
-    );
-
+  const terms = document.getElementById("terms");
   if(!terms.checked){
-
-    alert(
-      "You must accept Terms & Conditions"
-    );
-
+    alert("You must accept Terms & Conditions");
     return;
-
   }
 
-  const name =
-    document.getElementById(
-      "registerName"
-    ).value;
+  const name = document.getElementById("registerName").value.trim();
+  const email = document.getElementById("registerEmail").value.trim();
+  const password = document.getElementById("registerPassword").value;
+  const referral_code = document.getElementById("referralCode").value.trim();
 
-  const email =
-    document.getElementById(
-      "registerEmail"
-    ).value;
-
-  const password =
-    document.getElementById(
-      "registerPassword"
-    ).value;
-
-  const referral_code =
-    document.getElementById(
-      "referralCode"
-    ).value;
-
-  if(
-    !name ||
-    !email ||
-    !password
-  ){
-
-    alert(
-      "Please fill all required fields"
-    );
-
+  if(!name || !email || !password){
+    alert("Please fill all required fields");
     return;
-
   }
 
   try{
+    const res = await fetch(`${API_BASE}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password, referral_code })
+    });
 
-    const res = await fetch(
-      `${API_BASE}/api/register`,
-
-      {
-
-        method:"POST",
-
-        headers:{
-          "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-          name,
-          email,
-          password,
-          referral_code
-
-        })
-
-      }
-
-    );
-
-    const data =
-      await res.json();
-
+    const data = await res.json();
     alert(data.message);
 
     if(data.success){
-
       showLogin();
-
     }
-
+  } catch(err){
+    console.error("Registration Error Context:", err);
+    alert("Network error: Verification connection failed.");
   }
-
-  catch(err){
-
-    console.log(err);
-
-    alert("Registration failed");
-
-  }
-
 }
 
-/* ================= LOGIN ================= */
-
+/* ================= LOGIN ENGINE ================= */
 async function login(){
-
-  const email =
-    document.getElementById(
-      "email"
-    ).value;
-
-  const password =
-    document.getElementById(
-      "password"
-    ).value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
   if(!email || !password){
-
-    alert(
-      "Enter email and password"
-    );
-
+    alert("Enter email and password");
     return;
-
   }
 
   try{
+    const res = await fetch(`${API_BASE}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-    const res = await fetch(
-
-      `${API_BASE}/api/login`,
-
-      {
-
-        method:"POST",
-
-        headers:{
-          "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-          email,
-          password
-
-        })
-
-      }
-
-    );
-
-    const data =
-      await res.json();
+    const data = await res.json();
 
     if(data.success){
-
-      localStorage.setItem(
-        "token",
-        data.token
-      );
-
-      localStorage.setItem(
-        "user_id",
-        data.user.id
-      );
-
-      localStorage.setItem(
-        "isAdmin",
-        data.user.isAdmin
-      );
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user_id", data.user.id);
+      localStorage.setItem("isAdmin", data.user.isAdmin);
 
       if(data.user.isAdmin){
-
-        window.location.href =
-          "admin.html";
-
+        window.location.href = "admin.html";
       }else{
-
-        window.location.href =
-          "dashboard.html";
-
+        window.location.href = "dashboard.html";
       }
-
     }else{
-
       alert(data.message);
-
     }
-
+  } catch(err){
+    console.error("Login Error Context:", err);
+    alert("Network error: Could not authenticate with server.");
   }
-
-  catch(err){
-
-    console.log(err);
-
-    alert("Login failed");
-
-  }
-
 }
 
-/* ================= LOAD ANNOUNCEMENT ================= */
-
+/* ================= ASYNC ANNOUNCEMENT LOADER ================= */
 async function loadAnnouncement(){
-
   try{
-
-    const res = await fetch(
-
-      `${API_BASE}/api/announcement`
-
-    );
-
-    const data =
-      await res.json();
-
+    const res = await fetch(`${API_BASE}/api/announcement`);
+    const data = await res.json();
     if(data.success){
-
-      document.getElementById(
-        "announcement"
-      ).innerText =
-        data.message;
-
+      // Support fallback fields from both duplicate endpoints
+      document.getElementById("announcement").innerText = data.message || (data.announcement ? data.announcement.message : "Welcome to GIKAZEE!");
     }
-
+  } catch(err){
+    console.log("Announcement ticker bypassed safely:", err);
   }
-
-  catch(err){
-
-    console.log(err);
-
-  }
-
 }
 
-/* ================= START ================= */
-
-loadAnnouncement();
-
+// Safely evaluate layout on content loaded
+document.addEventListener("DOMContentLoaded", () => {
+    loadAnnouncement();
+});
 </script>
-
 </body>
 </html>
