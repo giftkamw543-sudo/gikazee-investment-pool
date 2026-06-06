@@ -495,7 +495,8 @@ async function loadDashboard(){
                 <div id="progress-${inv.id}" style="width:0%; height:100%; background:#22c55e;"></div>
               </div>
             </td>
-            <td><button onclick="downloadReceipt(${inv.id}, '${inv.plan_name}', ${inv.amount})">TXT</button></td>
+            <td><button onclick="downloadReceipt(${inv.id}, '${inv.plan_name}', ${inv.amount})">Statement</button></td>
+
           </tr>`;
       });
       createChart(data.investments);
