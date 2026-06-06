@@ -9,6 +9,11 @@ const path = require("path");
 
 const app = express();
 
+const fs = require("fs");
+if (!fs.existsSync("./uploads")) {
+  fs.mkdirSync("./uploads");
+}
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended:true }));
@@ -26,22 +31,28 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// ================= DATABASE CONNECTION (RAILWAY COMPATIBLE) =================
-const db = mysql.createConnection({
+// ================= DATABASE CONNECTION (POOL STABILIZED) =================
+const db = mysql.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   user: process.env.MYSQLUSER || process.env.DB_USER,
   password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
   database: process.env.MYSQLDATABASE || process.env.DB_NAME,
-  port: process.env.MYSQLPORT || 3306
+  port: process.env.MYSQLPORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-db.connect((err) => {
+// Test the pool connection on startup
+db.getConnection((err, connection) => {
   if (err) {
-    console.log("DB CONNECTION ERROR:", err);
+    console.log("DB POOL CONNECTION ERROR:", err);
   } else {
-    console.log("MySQL Database Connected Successfully!");
+    console.log("MySQL Database Connected Successfully via Pool!");
+    connection.release(); // release it back to the pool
   }
 });
+
 
 // ================= JWT MIDDLEWARE =================
 function verifyToken(req, res, next){
@@ -150,21 +161,79 @@ app.post("/api/deposit", verifyToken, upload.single("proof"), (req, res) => {
   );
 });
 
-// ================= WITHDRAW =================
+// ================= WITHDRAW (VALIDATED) =================
 app.post("/api/withdraw", verifyToken, (req, res) => {
-  const { user_id, amount, payment_method, payment_details } = req.body;
-  db.query(
-    `INSERT INTO transactions (user_id, type, amount, status, payment_method, payment_details) VALUES(?,?,?,?,?,?)`,
-    [user_id, "withdrawal", amount, "pending", payment_method, payment_details],
-    (err) => {
-      if(err){
-        console.log(err);
-        return res.json({ success:false, message:"Withdrawal failed" });
+  const user_id = req.user.id; 
+  const amount = parseFloat(req.body.amount);
+  const { payment_method, payment_details } = req.body;
+
+  if (isNaN(amount) || amount <= 0) {
+    return res.json({ success: false, message: "Please enter a valid withdrawal amount greater than $0.00" });
+  }
+
+  db.query("SELECT balance FROM users WHERE id = ?", [user_id], (err, results) => {
+    if (err || results.length === 0) {
+      return res.json({ success: false, message: "Account verification failed" });
+    }
+
+    const currentBalance = parseFloat(results[0].balance);
+    if (amount > currentBalance) {
+      return res.json({ success: false, message: `Insufficient balance. You have $${currentBalance.toFixed(2)}` });
+    }
+
+    db.query(
+      `INSERT INTO transactions (user_id, type, amount, status, payment_method, payment_details) VALUES(?,?,?,?,?,?)`,
+      [user_id, "withdrawal", amount, "pending", payment_method, payment_details],
+      (err) => {
+        if (err) {
+          console.log("WITHDRAWAL INSERT ERROR:", err);
+          return res.json({ success: false, message: "Withdrawal submission failed" });
+        }
+        res.json({ success: true, message: "Withdrawal request submitted successfully" });
       }
-      res.json({ success:true, message:"Withdrawal request submitted" });
+    );
+  });
+});
+
+// ================= DAILY ROI ENGINE (5-MIN SHORT INTERVAl) =================
+function runDailyROI() {
+  db.query(
+    `SELECT investments.id, investments.user_id, investments.amount, investments.end_date, investments.last_roi_date, investments.principal_returned, plans.daily_roi_percent FROM investments LEFT JOIN plans ON investments.plan_id = plans.id WHERE investments.status='active'`,
+    (err, investments) => {
+      if (err || !investments) return;
+
+      investments.forEach((inv) => {
+        const now = new Date();
+        const endDate = new Date(inv.end_date);
+
+        if (now >= endDate) {
+          if (inv.principal_returned === 1) return;
+          db.query(`UPDATE investments SET status='completed', principal_returned=1 WHERE id=?`, [inv.id], (err) => {
+            if (err) return;
+            db.query(`UPDATE users SET balance = balance + ? WHERE id=?`, [inv.amount, inv.user_id]);
+            db.query(`INSERT INTO notifications(user_id,message) VALUES(?,?)`, [inv.user_id, `Investment completed. Principal of $${inv.amount} returned to balance`]);
+          });
+          return;
+        }
+
+        const today = now.toISOString().split("T")[0];
+        let lastDate = inv.last_roi_date ? new Date(inv.last_roi_date).toISOString().split("T")[0] : null;
+        if (today === lastDate) return; // Safely halts if they already got paid today
+
+        const roi = (parseFloat(inv.amount) * parseFloat(inv.daily_roi_percent)) / 100;
+        db.query(`UPDATE users SET balance = balance + ?, roi_total = roi_total + ? WHERE id=?`, [roi, roi, inv.user_id], (err) => {
+          if (err) return;
+          db.query("UPDATE investments SET last_roi_date=NOW() WHERE id=?", [inv.id]);
+          db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [inv.user_id, `Daily ROI added: $${roi.toFixed(2)}`]);
+        });
+      });
     }
   );
-});
+}
+
+// Run engine every 5 minutes to bypass server sleep cycles safely
+setInterval(runDailyROI, 300000);
+
 
 // ================= INVEST =================
 app.post("/api/invest", verifyToken, (req, res) => {
