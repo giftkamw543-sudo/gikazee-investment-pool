@@ -24,7 +24,7 @@ function getMailTransporter() {
     mailTransporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'gikazeeinvestment@gmail.com', // Your designated system email
+        user: process.env.EMAIL_USER,         // Your designated system email
         pass: process.env.EMAIL_PASS         // Your Gmail App Password from Railway
       }
     });
@@ -37,7 +37,7 @@ async function sendGikazeeEmail(toEmail, subject, htmlContent) {
   try {
     const transporter = getMailTransporter(); // Fetch instance at runtime
     const mailOptions = {
-      from: '"GIKAZEE" <gikazeeinvestment@gmail.com>',
+      from: `"GIKAZEE" <${process.env.EMAIL_USER}>`,
       to: toEmail,
       subject: subject,
       html: htmlContent
