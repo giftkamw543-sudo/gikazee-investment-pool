@@ -27,7 +27,7 @@ function getMailTransporter() {
       port: 465,
       secure: true, // true for port 465, false for other ports
       auth: {
-        user: 'gikazeeinvestment@gmail.com', 
+        user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS         
       },
       connectionTimeout: 10000, // 10 seconds timeout
@@ -42,7 +42,7 @@ async function sendGikazeeEmail(toEmail, subject, htmlContent) {
   try {
     const transporter = getMailTransporter(); 
     const mailOptions = {
-      from: '"GIKAZEE" <gikazeeinvestment@gmail.com>',
+      from: `"GIKAZEE" <${process.env.EMAIL_USER}>`,
       to: toEmail,
       subject: subject,
       html: htmlContent
