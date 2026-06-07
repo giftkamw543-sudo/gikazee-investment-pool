@@ -67,10 +67,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ================= DATABASE CONNECTION (POOL STABILIZED) =================
-const mysql = require('mysql2/promise'); // Using promise-based wrapper is highly recommended
+const mysqlPromise = require('mysql2/promise'); // Using promise-based wrapper is highly recommended
 
-// 1. Create a managed connection pool instead of a single connection
-const dbPool = mysql.createPool({
+// Change 'mysql.createPool' to 'mysqlPromise.createPool'
+const db = mysqlPromise.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   user: process.env.MYSQLUSER || process.env.DB_USER,
   password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
