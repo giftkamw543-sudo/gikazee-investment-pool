@@ -16,25 +16,33 @@ if (!fs.existsSync("./uploads")) {
 
 const nodemailer = require('nodemailer');
 
-// Initialize Secure Mail Transporter Configuration
-const mailTransporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+// Initialize Secure Mail Transporter Configuration lazily
+let mailTransporter = null;
+
+function getMailTransporter() {
+  if (!mailTransporter) {
+    mailTransporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
   }
-});
+  return mailTransporter;
+}
 
 // Reusable Core Mail Trigger Engine
 async function sendGikazeeEmail(toEmail, subject, htmlContent) {
   try {
+    const transporter = getMailTransporter(); // Fetch instance at runtime
     const mailOptions = {
       from: process.env.EMAIL_FROM || '"GIKAZEE" <no-reply@gikazee.com>',
       to: toEmail,
       subject: subject,
       html: htmlContent
     };
-    await mailTransporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     console.log(`Email successfully dispatched to: ${toEmail}`);
   } catch (error) {
     console.error("Mail engine execution dropped:", error);
@@ -59,26 +67,35 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ================= DATABASE CONNECTION (POOL STABILIZED) =================
-const db = mysql.createPool({
+const mysql = require('mysql2/promise'); // Using promise-based wrapper is highly recommended
+
+// 1. Create a managed connection pool instead of a single connection
+const dbPool = mysql.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   user: process.env.MYSQLUSER || process.env.DB_USER,
   password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
   database: process.env.MYSQLDATABASE || process.env.DB_NAME,
-  port: process.env.MYSQLPORT || 3306,
+  port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  connectionLimit: 10, // Allows up to 10 active connections simultaneously
+  queueLimit: 0,
+  enableKeepAlive: true, // Sends small packets periodically to prevent timeouts
+  keepAliveInitialDelay: 10000
 });
 
-// Test the pool connection on startup
-db.getConnection((err, connection) => {
-  if (err) {
-    console.log("DB POOL CONNECTION ERROR:", err);
-  } else {
-    console.log("MySQL Database Connected Successfully via Pool!");
-    connection.release();
+// 2. Test the pool connection on startup
+(async () => {
+  try {
+    const connection = await dbPool.getConnection();
+    console.log("MySQL Database Pool Connected Successfully!");
+    connection.release(); // Always release the connection back to the pool!
+  } catch (error) {
+    console.error("Database connection pool failed initialization:", error);
   }
-});
+})();
+
+module.exports = dbPool;
+
 
 // ================= JWT MIDDLEWARE =================
 function verifyToken(req, res, next){
