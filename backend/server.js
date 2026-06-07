@@ -24,8 +24,8 @@ function getMailTransporter() {
     mailTransporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: 'gikazeeinvestment@gmail.com', // Your designated system email
+        pass: process.env.EMAIL_PASS         // Your Gmail App Password from Railway
       }
     });
   }
@@ -37,7 +37,7 @@ async function sendGikazeeEmail(toEmail, subject, htmlContent) {
   try {
     const transporter = getMailTransporter(); // Fetch instance at runtime
     const mailOptions = {
-      from: process.env.EMAIL_FROM || '"GIKAZEE" <no-reply@gikazee.com>',
+      from: '"GIKAZEE" <gikazeeinvestment@gmail.com>',
       to: toEmail,
       subject: subject,
       html: htmlContent
@@ -67,7 +67,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ================= DATABASE CONNECTION (STABILIZED POOL) =================
-// We use the classic pool here so that your legacy callback queries work perfectly without rewriting them!
+// Using a callback pool to support legacy queries without breaking execution strings
 const db = mysql.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   user: process.env.MYSQLUSER || process.env.DB_USER,
@@ -75,24 +75,23 @@ const db = mysql.createPool({
   database: process.env.MYSQLDATABASE || process.env.DB_NAME,
   port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
   waitForConnections: true,
-  connectionLimit: 15, // Allows multiple concurrent active connections
+  connectionLimit: 15, 
   queueLimit: 0,
   enableKeepAlive: true, 
   keepAliveInitialDelay: 10000
 });
 
-// Test the pool connection layout on startup using classic callbacks
+// Test the connection pool link on application initialization
 db.getConnection((err, connection) => {
   if (err) {
     console.error("Database connection pool failed initialization:", err);
     return;
   }
   console.log("MySQL Database Pool Connected Successfully!");
-  connection.release(); // Always release the connection back to the pool!
+  connection.release();
 });
 
 module.exports = db;
-
 
 // ================= JWT MIDDLEWARE =================
 function verifyToken(req, res, next){
@@ -138,7 +137,7 @@ app.post("/api/register", async (req, res) => {
           console.log("REGISTER ERROR:", err);
           return res.json({ success: false, message: err.sqlMessage || err.message });
         }
-        
+
         res.json({ success: true, message: "Registration successful" });
 
         // --- AUTO-EMAIL TRACER FOR NEW REGISTRATIONS ---
@@ -343,8 +342,7 @@ app.post("/api/invest", verifyToken, (req, res) => {
 // ================= APPROVE TRANSACTION =================
 app.post("/api/admin/approve", verifyAdmin, (req, res) => {
   const { transaction_id } = req.body;
-  
-  // Cleanly join users to grab email dynamically for our notifications
+
   db.query(
     "SELECT t.*, u.email FROM transactions t JOIN users u ON t.user_id = u.id WHERE t.id=?", 
     [transaction_id], 
@@ -357,7 +355,7 @@ app.post("/api/admin/approve", verifyAdmin, (req, res) => {
         db.query("UPDATE transactions SET status='approved' WHERE id=?", [transaction_id]);
         db.query("UPDATE users SET balance = balance + ? WHERE id=?", [tx.amount, tx.user_id]);
         db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [tx.user_id, "Your deposit has been approved"]);
-        
+
         sendGikazeeEmail(userEmail, "Deposit Approved Successfully! 📈", `
           <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155;">
             <h2 style="color: #2563eb;">GIKAZEE INVESTMENT</h2>
@@ -422,7 +420,7 @@ app.get("/api/admin/users", verifyAdmin, (req, res) => {
   });
 });
 
-// ================= SUSPEND USER =================
+// ================= SUSPEND USER ================
 app.post("/api/admin/suspend-user", verifyAdmin, (req, res) => {
   db.query(`UPDATE users SET status='suspended' WHERE id=?`, [req.body.user_id], (err) => {
     if (err) return res.json({ success:false });
@@ -548,7 +546,7 @@ function runDailyROIEngine() {
     }
   );
 
-  // --- AUTOMATED EXPIRATION CRON LOOP (STABILIZED FOR MYSQL) ---
+  // --- AUTOMATED EXPIRATION CRON LOOP ---
   db.query(
     `SELECT i.*, u.email, u.name FROM investments i 
      JOIN users u ON i.user_id = u.id 
