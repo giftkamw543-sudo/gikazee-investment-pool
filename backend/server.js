@@ -21,12 +21,17 @@ let mailTransporter = null;
 
 function getMailTransporter() {
   if (!mailTransporter) {
+    // Modified specifically for hosting providers like Railway to prevent ETIMEDOUT
     mailTransporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // true for port 465, false for other ports
       auth: {
-        user: 'gikazeeinvestment@gmail.com', // Your designated system email
-        pass: process.env.EMAIL_PASS         // Your Gmail App Password from Railway
-      }
+        user: 'gikazeeinvestment@gmail.com', 
+        pass: process.env.EMAIL_PASS         
+      },
+      connectionTimeout: 10000, // 10 seconds timeout
+      socketTimeout: 10000
     });
   }
   return mailTransporter;
@@ -35,7 +40,7 @@ function getMailTransporter() {
 // Reusable Core Mail Trigger Engine
 async function sendGikazeeEmail(toEmail, subject, htmlContent) {
   try {
-    const transporter = getMailTransporter(); // Fetch instance at runtime
+    const transporter = getMailTransporter(); 
     const mailOptions = {
       from: '"GIKAZEE" <gikazeeinvestment@gmail.com>',
       to: toEmail,
@@ -67,7 +72,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ================= DATABASE CONNECTION (STABILIZED POOL) =================
-// Using a callback pool to support legacy queries without breaking execution strings
 const db = mysql.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   user: process.env.MYSQLUSER || process.env.DB_USER,
