@@ -66,32 +66,30 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// ================= DATABASE CONNECTION (POOL STABILIZED) =================
-const mysqlPromise = require('mysql2/promise');
-
-const db = mysqlPromise.createPool({
+// ================= DATABASE CONNECTION (STABILIZED POOL) =================
+// We use the classic pool here so that your legacy callback queries work perfectly without rewriting them!
+const db = mysql.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   user: process.env.MYSQLUSER || process.env.DB_USER,
   password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
   database: process.env.MYSQLDATABASE || process.env.DB_NAME,
   port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
   waitForConnections: true,
-  connectionLimit: 10, // Allows up to 10 active connections simultaneously
+  connectionLimit: 15, // Allows multiple concurrent active connections
   queueLimit: 0,
   enableKeepAlive: true, 
   keepAliveInitialDelay: 10000
 });
 
-// 2. Test the pool connection on startup
-(async () => {
-  try {
-    const connection = await db.getConnection();
-    console.log("MySQL Database Pool Connected Successfully!");
-    connection.release(); // Always release the connection back to the pool!
-  } catch (error) {
-    console.error("Database connection pool failed initialization:", error);
+// Test the pool connection layout on startup using classic callbacks
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("Database connection pool failed initialization:", err);
+    return;
   }
-})();
+  console.log("MySQL Database Pool Connected Successfully!");
+  connection.release(); // Always release the connection back to the pool!
+});
 
 module.exports = db;
 
