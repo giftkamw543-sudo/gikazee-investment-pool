@@ -24,8 +24,8 @@ function getMailTransporter() {
     mailTransporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'gikazeeinvestment@gmail.com', // Your designated system email
-        pass: process.env.EMAIL_PASS         // Your Gmail App Password from Railway
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
   }
@@ -35,9 +35,9 @@ function getMailTransporter() {
 // Reusable Core Mail Trigger Engine
 async function sendGikazeeEmail(toEmail, subject, htmlContent) {
   try {
-    const transporter = getMailTransporter(); // Fetch instance at runtime
+    const transporter = getMailTransporter();
     const mailOptions = {
-      from: '"GIKAZEE" <gikazeeinvestment@gmail.com>',
+      from: `"GIKAZEE" <${process.env.EMAIL_USER}>`,
       to: toEmail,
       subject: subject,
       html: htmlContent
@@ -511,98 +511,25 @@ app.get("/api/admin/pending-withdrawals", verifyAdmin, (req, res) => {
   });
 });
 
-// ================= ROUTINE DAILY ROI & EXPIRATION WARNING ENGINE =================
-function runDailyROIEngine() {
-  db.query(
-    `SELECT investments.id, investments.user_id, investments.amount, investments.end_date, investments.last_roi_date, investments.principal_returned, plans.name AS plan_name, plans.daily_roi_percent FROM investments LEFT JOIN plans ON investments.plan_id = plans.id WHERE investments.status='active'`,
-    (err, investments) => {
-      if (err || !investments) return;
-
-      investments.forEach((inv) => {
-        const now = new Date();
-        const endDate = new Date(inv.end_date);
-
-        if (now >= endDate) {
-          if (inv.principal_returned === 1) return;
-          db.query(`UPDATE investments SET status='completed', principal_returned=1 WHERE id=?`, [inv.id], (err) => {
-            if (err) return;
-            db.query(`UPDATE users SET balance = balance + ? WHERE id=?`, [inv.amount, inv.user_id]);
-            db.query(`INSERT INTO notifications(user_id,message) VALUES(?,?)`, [inv.user_id, `Investment completed. Principal of $${inv.amount} returned to balance`]);
-          });
-          return;
-        }
-
-        const today = now.toISOString().split("T")[0];
-        let lastDate = inv.last_roi_date ? new Date(inv.last_roi_date).toISOString().split("T")[0] : null;
-        if (today === lastDate) return;
-
-        const roi = (parseFloat(inv.amount) * parseFloat(inv.daily_roi_percent)) / 100;
-        db.query(`UPDATE users SET balance = balance + ?, roi_total = roi_total + ? WHERE id=?`, [roi, roi, inv.user_id], (err) => {
-          if (err) return;
-          db.query("UPDATE investments SET last_roi_date=NOW() WHERE id=?", [inv.id]);
-          db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [inv.user_id, `Daily ROI added: $${roi.toFixed(2)}`]);
-        });
-      });
-    }
-  );
-
-  // --- AUTOMATED EXPIRATION CRON LOOP ---
-  db.query(
-    `SELECT i.*, u.email, u.name FROM investments i 
-     JOIN users u ON i.user_id = u.id 
-     WHERE i.status = 'active' 
-       AND i.end_date <= DATE_ADD(NOW(), INTERVAL 1 DAY) 
-       AND i.end_date > NOW() 
-       AND i.warning_sent IS NOT TRUE`,
-    (err, expiringSoon) => {
-      if (err || !expiringSoon || expiringSoon.length === 0) return;
-
-      expiringSoon.forEach((inv) => {
-        sendGikazeeEmail(inv.email, "Action Required: Your Investment Package Completes Tomorrow! 🚨", `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155; line-height: 1.6;">
-            <h2 style="color: #dc2626;">GIKAZEE PROTECTION SYSTEM</h2>
-            <p>Hello ${inv.name || 'Investor'},</p>
-            <p>This is an automated operational notification regarding your active contract: <strong>${inv.plan_name || 'VIP Package'} ($${inv.amount})</strong>.</p>
-            <p>Your asset cycle is scheduled to reach official maturity tomorrow. To prevent your financial capital from laying idle without yield generation, we highly recommend planning your next step:</p>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h4 style="margin:0 0 10px 0; color:#2563eb;">⚡ Maximize Your Return Strategies:</h4>
-              <ul style="margin:0; padding-left:20px;">
-                <li><strong>Top-Up Option:</strong> Add capital to automatically step up your tier to unlock better premium daily interest rates.</li>
-                <li><strong>Compounding Rollover:</strong> Re-invest your processed balance immediately tomorrow to keep the compound interest machine ticking seamlessly.</li>
-              </ul>
-            </div>
-            <p>Head over to your GIKAZEE user dashboard and execute a fresh plan allocation to ensure your daily profit stream remains active without interruptions!</p>
-            <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
-            <small style="color: #94a3b8;">&copy; 2026 GIKAZEE Liquidity Portfolios.</small>
-          </div>
-        `);
-        db.query("UPDATE investments SET warning_sent = 1 WHERE id = ?", [inv.id]);
-      });
-    }
-  );
-}
-
-// Sweeps both cycles perfectly every 5 minutes
-setInterval(runDailyROIEngine, 300000);
-
-// ================= VERIFY ADMIN & ANNOUNCEMENTS =================
-app.get("/api/admin/verify", verifyAdmin, (req, res) => {
-  res.json({ success:true });
+// ================= ANNOUNCEMENTS =================
+app.get("/api/announcements", (req, res) => {
+  db.query("SELECT * FROM announcements WHERE status='active' ORDER BY id DESC", (err, results) => {
+    if (err) return res.json({ success: false });
+    res.json({ success: true, announcements: results });
+  });
 });
 
-let latestAnnouncement = "Welcome to GIKAZEE Investment Pool!";
-
-app.post("/api/admin/announcement", verifyAdmin, (req, res) => {
-  latestAnnouncement = req.body.message;
-  res.json({ success:true, message:"Announcement posted" });
+app.post("/api/admin/announcements", verifyAdmin, (req, res) => {
+  const { message } = req.body;
+  db.query("INSERT INTO announcements (message, status) VALUES(?,?)", [message, "active"], (err) => {
+    if (err) return res.json({ success: false });
+    res.json({ success: true, message: "Announcement created" });
+  });
 });
 
-app.get("/api/announcement", (req, res) => {
-  res.json({ success:true, message: latestAnnouncement });
-});
-
-// ================= START SERVER =================
+// ================= SERVER START =================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`GIKAZEE SERVER RUNNING ON PORT ${PORT}`);
 });
+
