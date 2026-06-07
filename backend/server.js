@@ -6,12 +6,39 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
 
-const fs = require("fs");
 if (!fs.existsSync("./uploads")) {
   fs.mkdirSync("./uploads");
+}
+
+const nodemailer = require('nodemailer');
+
+// Initialize Secure Mail Transporter Configuration
+const mailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// Reusable Core Mail Trigger Engine
+async function sendGikazeeEmail(toEmail, subject, htmlContent) {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || '"GIKAZEE" <no-reply@gikazee.com>',
+      to: toEmail,
+      subject: subject,
+      html: htmlContent
+    };
+    await mailTransporter.sendMail(mailOptions);
+    console.log(`Email successfully dispatched to: ${toEmail}`);
+  } catch (error) {
+    console.error("Mail engine execution dropped:", error);
+  }
 }
 
 app.use(cors());
@@ -49,10 +76,9 @@ db.getConnection((err, connection) => {
     console.log("DB POOL CONNECTION ERROR:", err);
   } else {
     console.log("MySQL Database Connected Successfully via Pool!");
-    connection.release(); // release it back to the pool
+    connection.release();
   }
 });
-
 
 // ================= JWT MIDDLEWARE =================
 function verifyToken(req, res, next){
@@ -98,7 +124,61 @@ app.post("/api/register", async (req, res) => {
           console.log("REGISTER ERROR:", err);
           return res.json({ success: false, message: err.sqlMessage || err.message });
         }
+        
         res.json({ success: true, message: "Registration successful" });
+
+        // --- AUTO-EMAIL TRACER FOR NEW REGISTRATIONS ---
+        const welcomeSubject = "Welcome to GIKAZEE INVESTMENT – Let's Make Your Money Work! 🚀";
+        const welcomeHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155; line-height: 1.6; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+            <div style="background: #0f172a; padding: 30px; text-align: center;">
+              <h1 style="color: #38bdf8; margin: 0; font-size: 26px; letter-spacing: 1px;">GIKAZEE INVESTMENT</h1>
+              <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 14px;">Asset Management & Growth Pool</p>
+            </div>
+            <div style="padding: 30px; background: #ffffff;">
+              <h2 style="color: #0f172a; margin-top: 0;">Welcome to the Community, ${name || 'Investor'}! 🎉</h2>
+              <p style="font-size: 15px; color: #475569;">
+                Your registration was completely successful. You have officially taken the first critical step toward securing long-term financial consistency. 
+                It is now time to **make your money work for you**, instead of you working tirelessly for it!
+              </p>
+              <p style="font-size: 15px; color: #475569; font-weight: bold; margin-top: 25px;">
+                Follow these 3 simple steps to activate your daily profit streams:
+              </p>
+              <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
+                <strong style="color: #2563eb; font-size: 15px;">Step 1: Make a Deposit 🏦</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #64748b;">
+                  Log into your profile dashboard, scroll down to the <b>Deposit</b> segment, choose your preferred local channel (Airtel, MTN, or USDT), and request an account balance top-up.
+                </p>
+              </div>
+              <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
+                <strong style="color: #2563eb; font-size: 15px;">Step 2: Allocate and Invest 📈</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #64748b;">
+                  Select a premier VIP compound interest contract plan that completely suits your capital capabilities, input your target amount, and lock it in.
+                </p>
+              </div>
+              <div style="background: #f8fafc; border-left: 4px solid #22c55e; padding: 15px; margin-bottom: 25px; border-radius: 0 8px 8px 0;">
+                <strong style="color: #22c55e; font-size: 15px;">Step 3: Watch Your Wealth Grow 💰</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #64748b;">
+                  Our professional Forex trade management desk assumes total command. Sit back, relax, track your dynamic timers, and collect your structured daily ROI settlements like clockwork.
+                </p>
+              </div>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.APP_FRONTEND_URL || 'https://gikazee.netlify.app'}" target="_blank" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 30px; font-weight: bold; border-radius: 8px; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);">
+                  Access Your Portal Dashboard
+                </a>
+              </div>
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;">
+              <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">
+                Need instant assistance setting up? Our dedicated chat support agents are always here to help guide your onboarding steps. Reply directly to this email or reach us instantly via our verified platform links.
+              </p>
+            </div>
+            <div style="background: #f1f5f9; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+              This is an automated operational notification dispatched securely by the GIKAZEE backend accounting architecture.<br>
+              &copy; 2026 GIKAZEE Investment Group. All rights reserved.
+            </div>
+          </div>
+        `;
+        sendGikazeeEmail(email, welcomeSubject, welcomeHtml);
       }
     );
   } catch (error) {
@@ -195,46 +275,6 @@ app.post("/api/withdraw", verifyToken, (req, res) => {
   });
 });
 
-// ================= DAILY ROI ENGINE (5-MIN SHORT INTERVAl) =================
-function runDailyROI() {
-  db.query(
-    `SELECT investments.id, investments.user_id, investments.amount, investments.end_date, investments.last_roi_date, investments.principal_returned, plans.daily_roi_percent FROM investments LEFT JOIN plans ON investments.plan_id = plans.id WHERE investments.status='active'`,
-    (err, investments) => {
-      if (err || !investments) return;
-
-      investments.forEach((inv) => {
-        const now = new Date();
-        const endDate = new Date(inv.end_date);
-
-        if (now >= endDate) {
-          if (inv.principal_returned === 1) return;
-          db.query(`UPDATE investments SET status='completed', principal_returned=1 WHERE id=?`, [inv.id], (err) => {
-            if (err) return;
-            db.query(`UPDATE users SET balance = balance + ? WHERE id=?`, [inv.amount, inv.user_id]);
-            db.query(`INSERT INTO notifications(user_id,message) VALUES(?,?)`, [inv.user_id, `Investment completed. Principal of $${inv.amount} returned to balance`]);
-          });
-          return;
-        }
-
-        const today = now.toISOString().split("T")[0];
-        let lastDate = inv.last_roi_date ? new Date(inv.last_roi_date).toISOString().split("T")[0] : null;
-        if (today === lastDate) return; // Safely halts if they already got paid today
-
-        const roi = (parseFloat(inv.amount) * parseFloat(inv.daily_roi_percent)) / 100;
-        db.query(`UPDATE users SET balance = balance + ?, roi_total = roi_total + ? WHERE id=?`, [roi, roi, inv.user_id], (err) => {
-          if (err) return;
-          db.query("UPDATE investments SET last_roi_date=NOW() WHERE id=?", [inv.id]);
-          db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [inv.user_id, `Daily ROI added: $${roi.toFixed(2)}`]);
-        });
-      });
-    }
-  );
-}
-
-// Run engine every 5 minutes to bypass server sleep cycles safely
-setInterval(runDailyROI, 300000);
-
-
 // ================= INVEST =================
 app.post("/api/invest", verifyToken, (req, res) => {
   const user_id = parseInt(req.body.user_id);
@@ -271,7 +311,7 @@ app.post("/api/invest", verifyToken, (req, res) => {
             db.query("SELECT * FROM users WHERE referral_code=?", [currentUser.referred_by], (err, refUsers) => {
               if (err || refUsers.length === 0) return;
               const referrer = refUsers[0];
-              if (referrer.id === currentUser.id) return; // anti-self referral
+              if (referrer.id === currentUser.id) return;
 
               const commission = amount * 0.05;
               db.query(`UPDATE users SET balance = balance + ?, referral_earnings = referral_earnings + ? WHERE id=?`, [commission, commission, referrer.id]);
@@ -289,29 +329,58 @@ app.post("/api/invest", verifyToken, (req, res) => {
 // ================= APPROVE TRANSACTION =================
 app.post("/api/admin/approve", verifyAdmin, (req, res) => {
   const { transaction_id } = req.body;
-  db.query("SELECT * FROM transactions WHERE id=?", [transaction_id], (err, results) => {
-    if(err || results.length === 0) return res.json({ success:false, message:"Transaction not found" });
-    const tx = results[0];
+  
+  // Cleanly join users to grab email dynamically for our notifications
+  db.query(
+    "SELECT t.*, u.email FROM transactions t JOIN users u ON t.user_id = u.id WHERE t.id=?", 
+    [transaction_id], 
+    (err, results) => {
+      if(err || results.length === 0) return res.json({ success:false, message:"Transaction not found" });
+      const tx = results[0];
+      const userEmail = tx.email;
 
-    if(tx.type === "deposit"){
-      db.query("UPDATE transactions SET status='approved' WHERE id=?", [transaction_id]);
-      db.query("UPDATE users SET balance = balance + ? WHERE id=?", [tx.amount, tx.user_id]);
-      db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [tx.user_id, "Your deposit has been approved"]);
-      return res.json({ success:true, message:"Deposit approved" });
-    }
-
-    if(tx.type === "withdrawal"){
-      db.query("SELECT balance FROM users WHERE id=?", [tx.user_id], (err, users) => {
-        if(err || users.length === 0) return res.json({ success:false, message:"User not found" });
-        if(parseFloat(users[0].balance) < parseFloat(tx.amount)) return res.json({ success:false, message:"Insufficient user balance" });
-
+      if(tx.type === "deposit"){
         db.query("UPDATE transactions SET status='approved' WHERE id=?", [transaction_id]);
-        db.query("UPDATE users SET balance = balance - ? WHERE id=?", [tx.amount, tx.user_id]);
-        db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [tx.user_id, "Your withdrawal has been approved"]);
-        return res.json({ success:true, message:"Withdrawal approved" });
-      });
+        db.query("UPDATE users SET balance = balance + ? WHERE id=?", [tx.amount, tx.user_id]);
+        db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [tx.user_id, "Your deposit has been approved"]);
+        
+        sendGikazeeEmail(userEmail, "Deposit Approved Successfully! 📈", `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155;">
+            <h2 style="color: #2563eb;">GIKAZEE INVESTMENT</h2>
+            <p>Hello,</p>
+            <p>Great news! Your deposit request for <strong>$${tx.amount}</strong> has been verified and approved by the treasury audit team.</p>
+            <p>Your capital has been successfully credited to your running portfolio and is actively accumulating yield cycles.</p>
+            <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
+            <small style="color: #94a3b8;">Thank you for choosing GIKAZEE Asset Management Group.</small>
+          </div>
+        `);
+        return res.json({ success:true, message:"Deposit approved" });
+      }
+
+      if(tx.type === "withdrawal"){
+        db.query("SELECT balance FROM users WHERE id=?", [tx.user_id], (err, users) => {
+          if(err || users.length === 0) return res.json({ success:false, message:"User not found" });
+          if(parseFloat(users[0].balance) < parseFloat(tx.amount)) return res.json({ success:false, message:"Insufficient user balance" });
+
+          db.query("UPDATE transactions SET status='approved' WHERE id=?", [transaction_id]);
+          db.query("UPDATE users SET balance = balance - ? WHERE id=?", [tx.amount, tx.user_id]);
+          db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [tx.user_id, "Your withdrawal has been approved"]);
+
+          sendGikazeeEmail(userEmail, "Withdrawal Dispatched! 🏦", `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155;">
+              <h2 style="color: #2563eb;">GIKAZEE INVESTMENT</h2>
+              <p>Hello,</p>
+              <p>Your withdrawal request for <strong>$${tx.amount}</strong> has been fully processed and approved by the admin team.</p>
+              <p>Funds have been dispatched directly to your specified gateway details: <strong>${tx.payment_method || 'Saved Settings'}</strong>.</p>
+              <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
+              <small style="color: #94a3b8;">Thank you for your continued trust in our community systems.</small>
+            </div>
+          `);
+          return res.json({ success:true, message:"Withdrawal approved" });
+        });
+      }
     }
-  });
+  );
 });
 
 // ================= REJECT TRANSACTION =================
@@ -430,10 +499,10 @@ app.get("/api/admin/pending-withdrawals", verifyAdmin, (req, res) => {
   });
 });
 
-// ================= DAILY ROI ENGINE =================
-function runDailyROI() {
+// ================= ROUTINE DAILY ROI & EXPIRATION WARNING ENGINE =================
+function runDailyROIEngine() {
   db.query(
-    `SELECT investments.id, investments.user_id, investments.amount, investments.end_date, investments.last_roi_date, investments.principal_returned, plans.daily_roi_percent FROM investments LEFT JOIN plans ON investments.plan_id = plans.id WHERE investments.status='active'`,
+    `SELECT investments.id, investments.user_id, investments.amount, investments.end_date, investments.last_roi_date, investments.principal_returned, plans.name AS plan_name, plans.daily_roi_percent FROM investments LEFT JOIN plans ON investments.plan_id = plans.id WHERE investments.status='active'`,
     (err, investments) => {
       if (err || !investments) return;
 
@@ -464,8 +533,45 @@ function runDailyROI() {
       });
     }
   );
+
+  // --- AUTOMATED EXPIRATION CRON LOOP (STABILIZED FOR MYSQL) ---
+  db.query(
+    `SELECT i.*, u.email, u.name FROM investments i 
+     JOIN users u ON i.user_id = u.id 
+     WHERE i.status = 'active' 
+       AND i.end_date <= DATE_ADD(NOW(), INTERVAL 1 DAY) 
+       AND i.end_date > NOW() 
+       AND i.warning_sent IS NOT TRUE`,
+    (err, expiringSoon) => {
+      if (err || !expiringSoon || expiringSoon.length === 0) return;
+
+      expiringSoon.forEach((inv) => {
+        sendGikazeeEmail(inv.email, "Action Required: Your Investment Package Completes Tomorrow! 🚨", `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155; line-height: 1.6;">
+            <h2 style="color: #dc2626;">GIKAZEE PROTECTION SYSTEM</h2>
+            <p>Hello ${inv.name || 'Investor'},</p>
+            <p>This is an automated operational notification regarding your active contract: <strong>${inv.plan_name || 'VIP Package'} ($${inv.amount})</strong>.</p>
+            <p>Your asset cycle is scheduled to reach official maturity tomorrow. To prevent your financial capital from laying idle without yield generation, we highly recommend planning your next step:</p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h4 style="margin:0 0 10px 0; color:#2563eb;">⚡ Maximize Your Return Strategies:</h4>
+              <ul style="margin:0; padding-left:20px;">
+                <li><strong>Top-Up Option:</strong> Add capital to automatically step up your tier to unlock better premium daily interest rates.</li>
+                <li><strong>Compounding Rollover:</strong> Re-invest your processed balance immediately tomorrow to keep the compound interest machine ticking seamlessly.</li>
+              </ul>
+            </div>
+            <p>Head over to your GIKAZEE user dashboard and execute a fresh plan allocation to ensure your daily profit stream remains active without interruptions!</p>
+            <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
+            <small style="color: #94a3b8;">&copy; 2026 GIKAZEE Liquidity Portfolios.</small>
+          </div>
+        `);
+        db.query("UPDATE investments SET warning_sent = 1 WHERE id = ?", [inv.id]);
+      });
+    }
+  );
 }
-setInterval(runDailyROI, 86400000);
+
+// Sweeps both cycles perfectly every 5 minutes
+setInterval(runDailyROIEngine, 300000);
 
 // ================= VERIFY ADMIN & ANNOUNCEMENTS =================
 app.get("/api/admin/verify", verifyAdmin, (req, res) => {
