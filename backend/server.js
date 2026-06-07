@@ -21,17 +21,15 @@ let mailTransporter = null;
 
 function getMailTransporter() {
   if (!mailTransporter) {
-    // Modified specifically for hosting providers like Railway to prevent ETIMEDOUT
+    // SendGrid SMTP Configuration - Professional & Reliable
     mailTransporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // true for port 465, false for other ports
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
       auth: {
-        user: 'gikazeeinvestment@gmail.com', 
-        pass: process.env.EMAIL_PASS         
-      },
-      connectionTimeout: 10000, // 10 seconds timeout
-      socketTimeout: 10000
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY
+      }
     });
   }
   return mailTransporter;
@@ -42,7 +40,7 @@ async function sendGikazeeEmail(toEmail, subject, htmlContent) {
   try {
     const transporter = getMailTransporter(); 
     const mailOptions = {
-      from: '"GIKAZEE" <gikazeeinvestment@gmail.com>',
+      from: `"GIKAZEE" <${process.env.EMAIL_USER}>`,
       to: toEmail,
       subject: subject,
       html: htmlContent
