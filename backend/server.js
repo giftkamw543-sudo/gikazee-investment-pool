@@ -67,9 +67,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ================= DATABASE CONNECTION (POOL STABILIZED) =================
-const mysqlPromise = require('mysql2/promise'); // Using promise-based wrapper is highly recommended
+const mysqlPromise = require('mysql2/promise');
 
-// Change 'mysql.createPool' to 'mysqlPromise.createPool'
 const db = mysqlPromise.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   user: process.env.MYSQLUSER || process.env.DB_USER,
@@ -79,14 +78,14 @@ const db = mysqlPromise.createPool({
   waitForConnections: true,
   connectionLimit: 10, // Allows up to 10 active connections simultaneously
   queueLimit: 0,
-  enableKeepAlive: true, // Sends small packets periodically to prevent timeouts
+  enableKeepAlive: true, 
   keepAliveInitialDelay: 10000
 });
 
 // 2. Test the pool connection on startup
 (async () => {
   try {
-    const connection = await dbPool.getConnection();
+    const connection = await db.getConnection();
     console.log("MySQL Database Pool Connected Successfully!");
     connection.release(); // Always release the connection back to the pool!
   } catch (error) {
@@ -94,7 +93,7 @@ const db = mysqlPromise.createPool({
   }
 })();
 
-module.exports = dbPool;
+module.exports = db;
 
 
 // ================= JWT MIDDLEWARE =================
