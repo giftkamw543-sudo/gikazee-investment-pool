@@ -22,9 +22,11 @@ let mailTransporter = null;
 function getMailTransporter() {
   if (!mailTransporter) {
     mailTransporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
       auth: {
-        user: 'gikazeeinvestment@gmail.com', // Your designated system email
+        user: process.env.EMAIL_USER, // Your designated system email
         pass: process.env.EMAIL_PASS         // Your Gmail App Password from Railway
       }
     });
