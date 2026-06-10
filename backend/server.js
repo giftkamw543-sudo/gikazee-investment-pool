@@ -16,7 +16,6 @@ if (!fs.existsSync("./uploads")) {
 }
 
 // ================= AUTOMATED EMAIL ENGINE (BREVO WEB API) =================
-// Bypasses Railway SMTP port restrictions completely using Web API architecture over HTTPS
 function sendGikazeeEmail(toEmail, subject, htmlContent) {
   const apiKey = process.env.BREVO_API_KEY;
   
@@ -25,12 +24,16 @@ function sendGikazeeEmail(toEmail, subject, htmlContent) {
     return;
   }
 
-  const data = JSON.stringify({
+  // Raw JSON Payload data
+  const payloadString = JSON.stringify({
     sender: { name: "GIKAZEE", email: "gikazeeinvestment@gmail.com" },
     to: [{ email: toEmail }],
     subject: subject,
     htmlContent: htmlContent
   });
+
+  // FIX: Convert to a Buffer so content-length calculates raw bytes (handles emojis safely)
+  const bodyData = Buffer.from(payloadString, 'utf8');
 
   const options = {
     hostname: 'api.brevo.com',
@@ -41,7 +44,7 @@ function sendGikazeeEmail(toEmail, subject, htmlContent) {
       'accept': 'application/json',
       'api-key': apiKey,
       'content-type': 'application/json',
-      'content-length': data.length
+      'content-length': bodyData.length // Uses accurate byte length
     }
   };
 
@@ -61,9 +64,11 @@ function sendGikazeeEmail(toEmail, subject, htmlContent) {
     console.error("Network infrastructure dropped email API call:", error);
   });
 
-  req.write(data);
+  // Write the byte buffer data to the request stream
+  req.write(bodyData);
   req.end();
 }
+
 
 app.use(cors());
 app.use(express.json());
