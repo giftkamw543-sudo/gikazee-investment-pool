@@ -145,12 +145,26 @@ app.get("/", (req, res) => {
 // ================= REGISTER =================
 app.post("/api/register", async (req, res) => {
   const { name, email, password, referral_code } = req.body;
+
+  // Validate email before doing anything else
+  console.log("[REGISTER] Incoming email value:", email);
+  if (!email || typeof email !== "string" || email.trim() === "") {
+    console.error("[REGISTER] Rejected: email is missing or empty.");
+    return res.json({ success: false, message: "A valid email address is required." });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    console.error("[REGISTER] Rejected: email failed format validation:", email);
+    return res.json({ success: false, message: "Please provide a valid email address." });
+  }
+  const sanitizedEmail = email.trim().toLowerCase();
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const myReferralCode = "GIKA" + Math.floor(1000 + Math.random() * 9000);
     db.query(
       `INSERT INTO users (name, email, password, balance, roi_total, referral_code, referred_by, status) VALUES(?,?,?,?,?,?,?,?)`,
-      [name, email, hashedPassword, 0, 0, myReferralCode, referral_code || null, "active"],
+      [name, sanitizedEmail, hashedPassword, 0, 0, myReferralCode, referral_code || null, "active"],
       (err) => {
         if (err) {
           console.log("REGISTER ERROR:", err);
@@ -247,7 +261,8 @@ app.post("/api/register", async (req, res) => {
             </div>
           </div>
         `;
-        sendGikazeeEmail(email, welcomeSubject, welcomeHtml);
+        console.log("[REGISTER] Sending welcome email to:", sanitizedEmail);
+        sendGikazeeEmail(sanitizedEmail, welcomeSubject, welcomeHtml);
       }
     );
   } catch (error) {
