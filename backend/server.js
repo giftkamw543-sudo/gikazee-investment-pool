@@ -159,19 +159,91 @@ app.post("/api/register", async (req, res) => {
 
         res.json({ success: true, message: "Registration successful" });
 
-        const welcomeSubject = "Welcome to GIKAZEE INVESTMENT – Let's Make Your Money Work! 🚀";
+        const welcomeSubject = "Account Activated: Start Earning Daily ROI with GIKAZEE! 🚀";
         const welcomeHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155; line-height: 1.6; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
             <div style="background: #0f172a; padding: 30px; text-align: center;">
               <h1 style="color: #38bdf8; margin: 0; font-size: 26px; letter-spacing: 1px;">GIKAZEE INVESTMENT</h1>
               <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 14px;">Asset Management & Growth Pool</p>
             </div>
+            
             <div style="padding: 30px; background: #ffffff;">
               <h2 style="color: #0f172a; margin-top: 0;">Welcome to the Community, ${name || 'Investor'}! 🎉</h2>
-              <p style="font-size: 15px; color: #475569;">Your registration was completely successful. You have officially taken the first critical step toward securing long-term financial consistency.</p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.APP_FRONTEND_URL || 'https://gikazee-investment.netlify.app'}" target="_blank" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 30px; font-weight: bold; border-radius: 8px; font-size: 15px; display: inline-block;">Access Your Portal Dashboard</a>
+              <p style="font-size: 15px; color: #475569;">Your registration was successful. Your account is active and secure. Let's get your money working for you immediately!</p>
+              
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+              
+              <!-- SECTION: PRICING PLANS TABLE -->
+              <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 15px; text-align: center;">💎 Our Premium VIP Investment Tiers</h3>
+              <div style="overflow-x: auto; margin-bottom: 25px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                  <thead>
+                    <tr style="background-color: #0f172a; color: #ffffff;">
+                      <th style="padding: 10px; border-top-left-radius: 6px; border-bottom-left-radius: 6px;">Plan Tier</th>
+                      <th style="padding: 10px;">Min - Max Deposit</th>
+                      <th style="padding: 10px;">Daily ROI</th>
+                      <th style="padding: 10px; border-top-right-radius: 6px; border-bottom-right-radius: 6px;">Lock-in</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                      <td style="padding: 12px 10px; font-weight: bold; color: #0f172a;">VIP Tier 1</td>
+                      <td style="padding: 12px 10px;">$50.00 - $99.00</td>
+                      <td style="padding: 12px 10px; color: #16a34a; font-weight: bold;">2.50%</td>
+                      <td style="padding: 12px 10px;">30 Days</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                      <td style="padding: 12px 10px; font-weight: bold; color: #0f172a;">VIP Tier 2</td>
+                      <td style="padding: 12px 10px;">$100.00 - $149.00</td>
+                      <td style="padding: 12px 10px; color: #16a34a; font-weight: bold;">3.0%</td>
+                      <td style="padding: 12px 10px;">30 Days</td>
+                    </tr>
+                    <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                      <td style="padding: 12px 10px; font-weight: bold; color: #0f172a;">VIP Tier 3</td>
+                      <td style="padding: 12px 10px;">$150.00 - $200.00</td>
+                      <td style="padding: 12px 10px; color: #16a34a; font-weight: bold;">3.5%</td>
+                      <td style="padding: 12px 10px;">30 Days</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                      <td style="padding: 12px 10px; font-weight: bold; color: #2563eb;">VIP Corporate</td>
+                      <td style="padding: 12px 10px;">$800.0+</td>
+                      <td style="padding: 12px 10px; color: #16a34a; font-weight: bold;">10.0%</td>
+                      <td style="padding: 12px 10px;">30 Days</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+
+              <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 15px;">🚀 3 Quick Steps to Start Earning Daily Yield:</h3>
+              
+              <div style="margin-bottom: 20px;">
+                <strong style="color: #2563eb; font-size: 16px;">1. Deposit Capital</strong>
+                <p style="margin: 5px 0 0 0; font-size: 14px; color: #475569;">Go to the <strong>Deposit</strong> section in your portal. Choose your preferred gateway (Mobile Money or USDT TRC20), follow the transfer instructions, and upload your receipt screenshot.</p>
+              </div>
+              
+              <div style="margin-bottom: 20px;">
+                <strong style="color: #2563eb; font-size: 16px;">2. Wait for Verification</strong>
+                <p style="margin: 5px 0 0 0; font-size: 14px; color: #475569;">Our administrative desk reviews receipts continuously. Your fund balance will update in your dashboard as soon as approval goes through.</p>
+              </div>
+              
+              <div style="margin-bottom: 25px;">
+                <strong style="color: #2563eb; font-size: 16px;">3. Select a Pool & Invest</strong>
+                <p style="margin: 5px 0 0 0; font-size: 14px; color: #475569;">Navigate to <strong>Invest Now</strong>, choose an investment package that fits your goal, and confirm. Your daily ROI tracking starts instantly!</p>
+              </div>
+
+              <div style="background: #f8fafc; border-left: 4px solid #38bdf8; padding: 15px; margin-bottom: 30px; border-radius: 4px;">
+                <p style="margin: 0; font-size: 13px; color: #64748b; font-style: italic;">💡 <strong>Pro Tip:</strong> Share your unique referral link found in your dashboard profile. You earn an immediate <strong>5% cash commission</strong> directly to your balance the moment your friends launch an investment package!</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.APP_FRONTEND_URL || 'https://gikazee-investment.netlify.app'}" target="_blank" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 30px; font-weight: bold; border-radius: 8px; font-size: 15px; display: inline-block;">Access Dashboard & Deposit Now</a>
+              </div>
+            </div>
+            
+            <div style="background: #f1f5f9; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 GIKAZEE Investment Pool. All financial rights reserved.</p>
             </div>
           </div>
         `;
