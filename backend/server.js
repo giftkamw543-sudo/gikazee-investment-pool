@@ -25,12 +25,26 @@ function sendGikazeeEmail(toEmail, subject, htmlContent) {
     return;
   }
 
-  const data = JSON.stringify({
+  const payload = {
     sender: { name: "GIKAZEE", email: "gikazeeinvestment@gmail.com" },
     to: [{ email: toEmail }],
     subject: subject,
     htmlContent: htmlContent
-  });
+  };
+
+  let data;
+  try {
+    data = JSON.stringify(payload);
+    // Validate the serialised payload is well-formed before sending
+    JSON.parse(data);
+  } catch (e) {
+    console.error("Mail Engine Stopped: Failed to serialise email payload to valid JSON:", e);
+    return;
+  }
+
+  // Use Buffer to get the true byte length so the Content-Length header is
+  // accurate even when the HTML contains multi-byte UTF-8 characters (emoji, etc.)
+  const dataBuffer = Buffer.from(data, 'utf8');
 
   const options = {
     hostname: 'api.brevo.com',
@@ -40,8 +54,8 @@ function sendGikazeeEmail(toEmail, subject, htmlContent) {
     headers: {
       'accept': 'application/json',
       'api-key': apiKey,
-      'content-type': 'application/json',
-      'content-length': data.length
+      'content-type': 'application/json; charset=utf-8',
+      'content-length': dataBuffer.length
     }
   };
 
@@ -61,7 +75,7 @@ function sendGikazeeEmail(toEmail, subject, htmlContent) {
     console.error("Network infrastructure dropped email API call:", error);
   });
 
-  req.write(data);
+  req.write(dataBuffer);
   req.end();
 }
 
