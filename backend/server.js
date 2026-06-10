@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const https = require("https"); // Built-in Node.js module to make web API calls safely
 
 const app = express();
 
@@ -14,44 +15,54 @@ if (!fs.existsSync("./uploads")) {
   fs.mkdirSync("./uploads");
 }
 
-const nodemailer = require('nodemailer');
+// ================= AUTOMATED EMAIL ENGINE (BREVO WEB API) =================
+// Bypasses Railway SMTP port restrictions completely using Web API architecture over HTTPS
+function sendGikazeeEmail(toEmail, subject, htmlContent) {
+  const apiKey = process.env.BREVO_API_KEY;
+  
+  if (!apiKey) {
+    console.error("Mail Engine Stopped: BREVO_API_KEY is missing from environment variables.");
+    return;
+  }
 
-// Initialize Secure Mail Transporter Configuration lazily
-let mailTransporter = null;
+  const data = JSON.stringify({
+    sender: { name: "GIKAZEE", email: "gikazeeinvestment@gmail.com" },
+    to: [{ email: toEmail }],
+    subject: subject,
+    htmlContent: htmlContent
+  });
 
-function getMailTransporter() {
-  if (!mailTransporter) {
-    // Modified specifically for hosting providers like Railway to prevent ETIMEDOUT
-    mailTransporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // true for port 465, false for other ports
-      auth: {
-        user: 'gikazeeinvestment@gmail.com', 
-        pass: process.env.EMAIL_PASS         
-      },
-      connectionTimeout: 10000, // 10 seconds timeout
-      socketTimeout: 10000
+  const options = {
+    hostname: 'api.brevo.com',
+    port: 443,
+    path: '/v3/smtp/email',
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json',
+      'content-length': data.length
+    }
+  };
+
+  const req = https.request(options, (res) => {
+    let responseBody = '';
+    res.on('data', (chunk) => { responseBody += chunk; });
+    res.on('end', () => {
+      if (res.statusCode === 201 || res.statusCode === 200) {
+        console.log(`Email successfully dispatched via API to: ${toEmail}`);
+      } else {
+        console.error(`Brevo API rejected delivery request. Code: ${res.statusCode}, Response: ${responseBody}`);
+      }
     });
-  }
-  return mailTransporter;
-}
+  });
 
-// Reusable Core Mail Trigger Engine
-async function sendGikazeeEmail(toEmail, subject, htmlContent) {
-  try {
-    const transporter = getMailTransporter(); 
-    const mailOptions = {
-      from: '"GIKAZEE" <gikazeeinvestment@gmail.com>',
-      to: toEmail,
-      subject: subject,
-      html: htmlContent
-    };
-    await transporter.sendMail(mailOptions);
-    console.log(`Email successfully dispatched to: ${toEmail}`);
-  } catch (error) {
-    console.error("Mail engine execution dropped:", error);
-  }
+  req.on('error', (error) => {
+    console.error("Network infrastructure dropped email API call:", error);
+  });
+
+  req.write(data);
+  req.end();
 }
 
 app.use(cors());
@@ -85,7 +96,6 @@ const db = mysql.createPool({
   keepAliveInitialDelay: 10000
 });
 
-// Test the connection pool link on application initialization
 db.getConnection((err, connection) => {
   if (err) {
     console.error("Database connection pool failed initialization:", err);
@@ -144,7 +154,6 @@ app.post("/api/register", async (req, res) => {
 
         res.json({ success: true, message: "Registration successful" });
 
-        // --- AUTO-EMAIL TRACER FOR NEW REGISTRATIONS ---
         const welcomeSubject = "Welcome to GIKAZEE INVESTMENT – Let's Make Your Money Work! 🚀";
         const welcomeHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155; line-height: 1.6; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
@@ -154,44 +163,10 @@ app.post("/api/register", async (req, res) => {
             </div>
             <div style="padding: 30px; background: #ffffff;">
               <h2 style="color: #0f172a; margin-top: 0;">Welcome to the Community, ${name || 'Investor'}! 🎉</h2>
-              <p style="font-size: 15px; color: #475569;">
-                Your registration was completely successful. You have officially taken the first critical step toward securing long-term financial consistency. 
-                It is now time to **make your money work for you**, instead of you working tirelessly for it!
-              </p>
-              <p style="font-size: 15px; color: #475569; font-weight: bold; margin-top: 25px;">
-                Follow these 3 simple steps to activate your daily profit streams:
-              </p>
-              <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
-                <strong style="color: #2563eb; font-size: 15px;">Step 1: Make a Deposit 🏦</strong>
-                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #64748b;">
-                  Log into your profile dashboard, scroll down to the <b>Deposit</b> segment, choose your preferred local channel (Airtel, MTN, or USDT), and request an account balance top-up.
-                </p>
-              </div>
-              <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
-                <strong style="color: #2563eb; font-size: 15px;">Step 2: Allocate and Invest 📈</strong>
-                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #64748b;">
-                  Select a premier VIP compound interest contract plan that completely suits your capital capabilities, input your target amount, and lock it in.
-                </p>
-              </div>
-              <div style="background: #f8fafc; border-left: 4px solid #22c55e; padding: 15px; margin-bottom: 25px; border-radius: 0 8px 8px 0;">
-                <strong style="color: #22c55e; font-size: 15px;">Step 3: Watch Your Wealth Grow 💰</strong>
-                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #64748b;">
-                  Our professional Forex trade management desk assumes total command. Sit back, relax, track your dynamic timers, and collect your structured daily ROI settlements like clockwork.
-                </p>
-              </div>
+              <p style="font-size: 15px; color: #475569;">Your registration was completely successful. You have officially taken the first critical step toward securing long-term financial consistency.</p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.APP_FRONTEND_URL || 'https://gikazee.netlify.app'}" target="_blank" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 30px; font-weight: bold; border-radius: 8px; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);">
-                  Access Your Portal Dashboard
-                </a>
+                <a href="${process.env.APP_FRONTEND_URL || 'https://gikazee-investment.netlify.app'}" target="_blank" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 30px; font-weight: bold; border-radius: 8px; font-size: 15px; display: inline-block;">Access Your Portal Dashboard</a>
               </div>
-              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;">
-              <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">
-                Need instant assistance setting up? Our dedicated chat support agents are always here to help guide your onboarding steps. Reply directly to this email or reach us instantly via our verified platform links.
-              </p>
-            </div>
-            <div style="background: #f1f5f9; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
-              This is an automated operational notification dispatched securely by the GIKAZEE backend accounting architecture.<br>
-              &copy; 2026 GIKAZEE Investment Group. All rights reserved.
             </div>
           </div>
         `;
@@ -258,7 +233,7 @@ app.post("/api/deposit", verifyToken, upload.single("proof"), (req, res) => {
   );
 });
 
-// ================= WITHDRAW (VALIDATED) =================
+// ================= WITHDRAW =================
 app.post("/api/withdraw", verifyToken, (req, res) => {
   const user_id = req.user.id; 
   const amount = parseFloat(req.body.amount);
@@ -319,7 +294,7 @@ app.post("/api/invest", verifyToken, (req, res) => {
           }
           db.query("INSERT INTO notifications(user_id,message) VALUES(?,?)", [user_id, "Investment started successfully"]);
 
-          // ================= REFERRAL COMMISSION =================
+          // Referral Commission Tracking
           db.query("SELECT * FROM users WHERE id=?", [user_id], (err, currentUsers) => {
             if (err || currentUsers.length === 0) return;
             const currentUser = currentUsers[0];
@@ -363,11 +338,8 @@ app.post("/api/admin/approve", verifyAdmin, (req, res) => {
         sendGikazeeEmail(userEmail, "Deposit Approved Successfully! 📈", `
           <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155;">
             <h2 style="color: #2563eb;">GIKAZEE INVESTMENT</h2>
-            <p>Hello,</p>
-            <p>Great news! Your deposit request for <strong>$${tx.amount}</strong> has been verified and approved by the treasury audit team.</p>
+            <p>Great news! Your deposit request for <strong>$${tx.amount}</strong> has been verified and approved.</p>
             <p>Your capital has been successfully credited to your running portfolio and is actively accumulating yield cycles.</p>
-            <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
-            <small style="color: #94a3b8;">Thank you for choosing GIKAZEE Asset Management Group.</small>
           </div>
         `);
         return res.json({ success:true, message:"Deposit approved" });
@@ -385,11 +357,8 @@ app.post("/api/admin/approve", verifyAdmin, (req, res) => {
           sendGikazeeEmail(userEmail, "Withdrawal Dispatched! 🏦", `
             <div style="font-family: Arial, sans-serif; max-width: 600px; color: #334155;">
               <h2 style="color: #2563eb;">GIKAZEE INVESTMENT</h2>
-              <p>Hello,</p>
-              <p>Your withdrawal request for <strong>$${tx.amount}</strong> has been fully processed and approved by the admin team.</p>
+              <p>Your withdrawal request for <strong>$${tx.amount}</strong> has been fully processed and approved.</p>
               <p>Funds have been dispatched directly to your specified gateway details: <strong>${tx.payment_method || 'Saved Settings'}</strong>.</p>
-              <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
-              <small style="color: #94a3b8;">Thank you for your continued trust in our community systems.</small>
             </div>
           `);
           return res.json({ success:true, message:"Withdrawal approved" });
@@ -550,7 +519,7 @@ function runDailyROIEngine() {
     }
   );
 
-  // --- AUTOMATED EXPIRATION CRON LOOP ---
+  // Expiration Warning Processing
   db.query(
     `SELECT i.*, u.email, u.name FROM investments i 
      JOIN users u ON i.user_id = u.id 
@@ -567,17 +536,7 @@ function runDailyROIEngine() {
             <h2 style="color: #dc2626;">GIKAZEE PROTECTION SYSTEM</h2>
             <p>Hello ${inv.name || 'Investor'},</p>
             <p>This is an automated operational notification regarding your active contract: <strong>${inv.plan_name || 'VIP Package'} ($${inv.amount})</strong>.</p>
-            <p>Your asset cycle is scheduled to reach official maturity tomorrow. To prevent your financial capital from laying idle without yield generation, we highly recommend planning your next step:</p>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h4 style="margin:0 0 10px 0; color:#2563eb;">⚡ Maximize Your Return Strategies:</h4>
-              <ul style="margin:0; padding-left:20px;">
-                <li><strong>Top-Up Option:</strong> Add capital to automatically step up your tier to unlock better premium daily interest rates.</li>
-                <li><strong>Compounding Rollover:</strong> Re-invest your processed balance immediately tomorrow to keep the compound interest machine ticking seamlessly.</li>
-              </ul>
-            </div>
-            <p>Head over to your GIKAZEE user dashboard and execute a fresh plan allocation to ensure your daily profit stream remains active without interruptions!</p>
-            <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
-            <small style="color: #94a3b8;">&copy; 2026 GIKAZEE Liquidity Portfolios.</small>
+            <p>Your asset cycle is scheduled to reach official maturity tomorrow. Head over to your dashboard to manage your rollover allocations.</p>
           </div>
         `);
         db.query("UPDATE investments SET warning_sent = 1 WHERE id = ?", [inv.id]);
@@ -586,7 +545,6 @@ function runDailyROIEngine() {
   );
 }
 
-// Sweeps both cycles perfectly every 5 minutes
 setInterval(runDailyROIEngine, 300000);
 
 // ================= VERIFY ADMIN & ANNOUNCEMENTS =================
