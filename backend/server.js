@@ -433,6 +433,11 @@ app.post("/api/admin/approve", verifyAdmin, (req, res) => {
             <p>Great news! Your deposit request for <strong>$${tx.amount}</strong> has been verified and approved.</p>
             <p>Your capital has been successfully credited to your running portfolio and is actively accumulating yield cycles.</p>
           </div>
+            
+            <div style="background: #f1f5f9; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 GIKAZEE Investment Pool. All financial rights reserved.</p>
+            </div>
+         
         `);
         return res.json({ success:true, message:"Deposit approved" });
       }
